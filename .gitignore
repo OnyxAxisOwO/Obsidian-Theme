@@ -1,0 +1,33 @@
+# --- Build artifacts ---------------------------------------------------------
+# The prebuilt .ipk in dist/ is intentionally committed so users can download it
+# directly. CI also attaches it to GitHub Releases. Other build leftovers below.
+*.tmp
+*.bak
+*.o
+build/
+
+# --- Python (packaging scripts) ----------------------------------------------
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# --- Node / tooling (none required, but keep clean) --------------------------
+node_modules/
+npm-debug.log*
+yarn-error.log*
+
+# --- Editor / IDE ------------------------------------------------------------
+.vscode/
+.idea/
+*.swp
+*~
+
+# --- Claude Code local session data ------------------------------------------
+.claude/
+
+# --- OS cruft ----------------------------------------------------------------
+.DS_Store
+Thumbs.db
+desktop.ini

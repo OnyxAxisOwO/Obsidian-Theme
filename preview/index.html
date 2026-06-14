@@ -9,11 +9,32 @@
 	try {
 		var d = document.documentElement, ls = window.localStorage;
 		var get = function (k, f) { try { var v = ls.getItem(k); return v === null ? f : v; } catch (e) { return f; } };
+		var hslToRgb = function (h, s, l) { var c = (1 - Math.abs(2 * l - 1)) * s, x = c * (1 - Math.abs((h / 60) % 2 - 1)), m = l - c / 2, r, g, b;
+			if (h < 60) { r = c; g = x; b = 0; } else if (h < 120) { r = x; g = c; b = 0; } else if (h < 180) { r = 0; g = c; b = x; }
+			else if (h < 240) { r = 0; g = x; b = c; } else if (h < 300) { r = x; g = 0; b = c; } else { r = c; g = 0; b = x; }
+			return [Math.round((r + m) * 255), Math.round((g + m) * 255), Math.round((b + m) * 255)]; };
+		var hslc = function (h, s, l) { return 'hsl(' + Math.round(h) + ', ' + Math.round(s * 100) + '%, ' + Math.round(l * 100) + '%)'; };
+		var parseSeed = function (seed) { var m = /^#?([0-9a-fA-F]{6})$/.exec((seed || '').trim()); if (!m) return null;
+			var n = parseInt(m[1], 16), r = (n >> 16 & 255) / 255, g = (n >> 8 & 255) / 255, b = (n & 255) / 255;
+			var mx = Math.max(r, g, b), mn = Math.min(r, g, b), df = mx - mn, h = 0, s = 0, l = (mx + mn) / 2;
+			if (df) { s = df / (1 - Math.abs(2 * l - 1)); h = (mx === r ? ((g - b) / df) % 6 : mx === g ? (b - r) / df + 2 : (r - g) / df + 4) * 60; if (h < 0) h += 360; }
+			return { h: h, s: s }; };
+		var seed = get('obsidian.accent', ''), globalTheme = get('obsidian.themeGlobal', '1') === '1';
+		var applyTheme = function (sd, dk) { var p = parseSeed(sd); if (!p) return;
+			var ach = p.s < 0.08, h = p.h, s = ach ? 0 : Math.max(0.32, Math.min(0.85, p.s)), sN = ach ? 0 : 0.06, sV = ach ? 0 : 0.12, rgb = hslToRgb(h, s, dk ? 0.80 : 0.42), S = function (k, v) { d.style.setProperty(k, v); };
+			S('--ob-accent', 'rgb(' + rgb[0] + ', ' + rgb[1] + ', ' + rgb[2] + ')'); S('--ob-accent-rgb', rgb[0] + ', ' + rgb[1] + ', ' + rgb[2]);
+			S('--ob-accent-press', hslc(h, s, dk ? 0.70 : 0.34)); S('--ob-accent-soft', hslc(h, Math.min(s, 0.55), dk ? 0.30 : 0.90)); S('--ob-on-accent', dk ? '#0a0a0a' : '#ffffff');
+			if (globalTheme) { S('--ob-bg', hslc(h, sN, dk ? 0.06 : 0.96)); S('--ob-card', hslc(h, sN, dk ? 0.12 : 0.99)); S('--ob-card-2', hslc(h, sN, dk ? 0.17 : 0.94)); S('--ob-card-strong', hslc(h, sN, dk ? 0.20 : 1.0));
+				S('--ob-bar', 'hsla(' + Math.round(h) + ', ' + Math.round(sN * 100) + '%, ' + (dk ? 6 : 98) + '%, 0.82)'); S('--ob-elevated', hslc(h, sN, dk ? 0.18 : 0.99));
+				S('--ob-hairline', hslc(h, sV, dk ? 0.30 : 0.82)); S('--ob-hairline-strong', hslc(h, sV, dk ? 0.42 : 0.68)); S('--ob-fill', hslc(h, sN, dk ? 0.17 : 0.94)); S('--ob-fill-hover', hslc(h, sN, dk ? 0.24 : 0.90));
+				S('--ob-text', hslc(h, sN, dk ? 0.92 : 0.10)); S('--ob-text-2', hslc(h, sV, dk ? 0.80 : 0.30)); S('--ob-text-3', hslc(h, sV, dk ? 0.60 : 0.50)); } };
 		var mode = get('obsidian.appearance', 'auto'), mq = window.matchMedia('(prefers-color-scheme: dark)');
-		var apply = function () { var dark = mode === 'dark' ? true : mode === 'light' ? false : mq.matches; d.setAttribute('data-darkmode', dark ? 'true' : 'false'); d.setAttribute('data-appearance', mode); };
+		var apply = function () { var dark = mode === 'dark' ? true : mode === 'light' ? false : mq.matches; d.setAttribute('data-darkmode', dark ? 'true' : 'false'); d.setAttribute('data-appearance', mode); if (seed) applyTheme(seed, dark); };
 		apply(); if (mode === 'auto') { try { mq.addEventListener('change', apply); } catch (e) { mq.addListener(apply); } }
-		var a = get('obsidian.accent', ''); if (a) d.style.setProperty('--ob-accent', a);
-		var w = get('obsidian.wallpaper', ''); if (w) d.style.setProperty('--ob-wallpaper', w);
+		var w = get('obsidian.wallpaper', ''); if (w) { d.style.setProperty('--ob-wallpaper', w); d.setAttribute('data-has-wallpaper', ''); }
+		var fit = get('obsidian.wpfit', ''), FITS = { cover: ['cover', 'no-repeat'], contain: ['contain', 'no-repeat'], stretch: ['100% 100%', 'no-repeat'], tile: ['auto', 'repeat'], center: ['auto', 'no-repeat'] };
+		if (fit && FITS[fit]) { d.style.setProperty('--ob-wallpaper-size', FITS[fit][0]); d.style.setProperty('--ob-wallpaper-repeat', FITS[fit][1]); }
+		var wd = get('obsidian.width', ''); if (wd) d.style.setProperty('--ob-content-width', wd);
 		var b = get('obsidian.blur', ''); if (b !== '') d.style.setProperty('--ob-wallpaper-blur', b + 'px');
 		var dm = get('obsidian.dim', ''); if (dm !== '') d.style.setProperty('--ob-wallpaper-dim', dm);
 		if (get('obsidian.reduceTransparency', '0') === '1') d.setAttribute('data-reduce-transparency', '');
@@ -80,6 +101,29 @@
 			<li><a href="#">路由表</a></li>
 			<li><a href="#">系统日志</a></li>
 		</ul>
+	</div>
+
+	<!-- Mirrors the iStoreOS unishare page that showed truncated tabs + misaligned labels -->
+	<ul class="cbi-tabmenu map">
+		<li class="cbi-tab"><a href="#">统一共享</a></li>
+		<li class="cbi-tab-disabled"><a href="#">用户</a></li>
+	</ul>
+
+	<div class="cbi-section">
+		<legend>全局</legend>
+		<ul class="cbi-tabmenu">
+			<li class="cbi-tab"><a href="#">常规设置</a></li>
+			<li class="cbi-tab-disabled"><a href="#">WebDAV 设置</a></li>
+		</ul>
+		<div class="cbi-value">
+			<label class="cbi-value-title">启用</label>
+			<div class="cbi-value-field"><input type="checkbox"></div>
+		</div>
+		<div class="cbi-value cbi-value-last">
+			<label class="cbi-value-title">允许匿名用户</label>
+			<div class="cbi-value-field"><input type="checkbox" checked></div>
+			<div class="cbi-value-description">对于登录用户，请在 '用户' 页面进行管理。</div>
+		</div>
 	</div>
 
 	<div class="cbi-section">
