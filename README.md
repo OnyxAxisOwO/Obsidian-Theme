@@ -12,6 +12,17 @@
   <img alt="Arch" src="https://img.shields.io/badge/arch-all-lightgrey">
 </p>
 
+## ⬇️ 下载
+
+| 来源 | 说明 |
+|---|---|
+| 📦 [**Releases**](../../releases/latest) | **推荐**。下载最新稳定版 `luci-theme-obsidian_*.ipk`（每个 `v*` 标签自动发布） |
+| 🤖 [**Actions**](../../actions/workflows/build.yml) | 每次提交自动构建，进入最近一次成功的运行 → 底部 **Artifacts** 下载 `luci-theme-obsidian-ipk` |
+
+下载后传到路由器执行 `opkg install luci-theme-obsidian_*.ipk` 即可（详见下方 [安装](#安装)）。装完请 **Ctrl+F5 强刷**。
+
+---
+
 Obsidian 把 macOS / iOS 的克制美学带到 OpenWrt 路由器后台，默认是**纯黑白高级感**，也可一键开启 **Material You** 整体着色：
 
 - 🌗 **浅色 / 深色 / 自动**：跟随系统，或在内置「设置」面板里一键切换，**无加载闪烁**。
