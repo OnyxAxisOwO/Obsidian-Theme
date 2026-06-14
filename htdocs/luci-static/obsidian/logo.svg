@@ -1,0 +1,28 @@
+<svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Obsidian">
+  <defs>
+    <linearGradient id="ob-bg" x1="12" y1="8" x2="108" y2="112" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#5E5CE6"/>
+      <stop offset=".55" stop-color="#0A84FF"/>
+      <stop offset="1" stop-color="#32D3EE"/>
+    </linearGradient>
+    <linearGradient id="ob-shard" x1="60" y1="26" x2="60" y2="94" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#dfe9ff"/>
+    </linearGradient>
+    <linearGradient id="ob-gloss" x1="60" y1="6" x2="60" y2="66" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffffff" stop-opacity=".45"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <!-- Apple-style squircle -->
+  <path d="M60 4C28.8 4 14.5 4 9.25 9.25 4 14.5 4 28.8 4 60s0 45.5 5.25 50.75C14.5 116 28.8 116 60 116s45.5 0 50.75-5.25C116 105.5 116 91.2 116 60s0-45.5-5.25-50.75C105.5 4 91.2 4 60 4Z" fill="url(#ob-bg)"/>
+  <path d="M60 4C28.8 4 14.5 4 9.25 9.25 4 14.5 4 28.8 4 60s0 45.5 5.25 50.75C14.5 116 28.8 116 60 116s45.5 0 50.75-5.25C116 105.5 116 91.2 116 60s0-45.5-5.25-50.75C105.5 4 91.2 4 60 4Z" fill="url(#ob-gloss)"/>
+  <!-- Faceted obsidian shard -->
+  <g>
+    <path d="M60 27 84 55 60 95 36 55 60 27Z" fill="url(#ob-shard)"/>
+    <path d="M60 27 84 55 60 95 60 27Z" fill="#0a84ff" fill-opacity=".14"/>
+    <path d="M36 55 60 55 60 95 36 55Z" fill="#0a1a3a" fill-opacity=".10"/>
+    <path d="M84 55 60 55 60 95 84 55Z" fill="#0a1a3a" fill-opacity=".18"/>
+    <path d="M60 27 84 55 60 55 36 55 60 27Z" fill="#ffffff" fill-opacity=".55"/>
+  </g>
+</svg>

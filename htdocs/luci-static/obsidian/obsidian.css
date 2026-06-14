@@ -1,0 +1,1009 @@
+/* ==========================================================================
+   Obsidian — an Apple-inspired theme layer for LuCI
+   Loaded AFTER cascade.css (the functional bootstrap base). This file only
+   re-skins: design tokens, frosted glass chrome, wallpaper, motion and the
+   Control Center. Functional widget behaviour stays with the base.
+   Licensed under the Apache License 2.0.
+   ========================================================================== */
+
+/* ----------------------------------------------------------------------------
+   1. Design tokens
+   The bootstrap base derives almost every colour from a small set of HSL
+   custom properties. We override those plus add Obsidian's own tokens.
+---------------------------------------------------------------------------- */
+:root {
+	/* Typeface — San Francisco where available, graceful CJK fallbacks */
+	--ob-font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display",
+		"Helvetica Neue", "Inter", "PingFang SC", "Hiragino Sans GB",
+		"Microsoft YaHei UI", "Microsoft YaHei", system-ui, sans-serif;
+	--ob-mono: ui-monospace, "SF Mono", "JetBrains Mono", "Menlo", "Consolas", monospace;
+
+	/* Accent (Apple system blue). Overridable by the Control Center. */
+	--ob-accent: #007aff;
+	--ob-accent-press: color-mix(in srgb, var(--ob-accent) 82%, #000);
+	--ob-on-accent: #ffffff;
+
+	/* Corner radii */
+	--ob-radius-sm: 9px;
+	--ob-radius: 14px;
+	--ob-radius-lg: 20px;
+	--ob-radius-xl: 26px;
+	--ob-radius-pill: 980px;
+
+	/* Glass / surfaces (light) */
+	--ob-card: rgba(255, 255, 255, .72);
+	--ob-card-2: rgba(255, 255, 255, .60);
+	--ob-card-strong: rgba(255, 255, 255, .86);
+	--ob-bar: rgba(255, 255, 255, .62);
+	--ob-elevated: rgba(255, 255, 255, .80);
+	--ob-hairline: rgba(0, 0, 0, .10);
+	--ob-hairline-strong: rgba(0, 0, 0, .16);
+	--ob-fill: rgba(120, 120, 128, .12);
+	--ob-fill-hover: rgba(120, 120, 128, .20);
+
+	/* Text (light) */
+	--ob-text: #1d1d1f;
+	--ob-text-2: #55555c;
+	--ob-text-3: #86868b;
+
+	/* Glass blur amount for panels/bars */
+	--ob-glass-blur: 24px;
+
+	/* Shadows — kept intentionally light for a flat look */
+	--ob-shadow-1: 0 1px 1px rgba(0, 0, 0, .03);
+	--ob-shadow-2: 0 6px 22px rgba(0, 0, 0, .10);
+	--ob-ring: 0 0 0 .5px rgba(0, 0, 0, .05);
+
+	/* Wallpaper — fixed background layer. Image only (gradients or url()).
+	   Default is a clean monochrome backdrop. */
+	--ob-wallpaper: linear-gradient(180deg, #f7f7f8 0%, #efeff1 55%, #e9e9ec 100%);
+	--ob-wallpaper-blur: 0px;
+	--ob-wallpaper-dim: 0;
+	--ob-wallpaper-scrim: 0; /* light scrim for readability on busy photos */
+
+	/* Spring-ish easings */
+	--ob-ease: cubic-bezier(.4, 0, .2, 1);
+	--ob-spring: cubic-bezier(.16, 1, .3, 1);
+
+	/* Map Obsidian accent onto the base's primary tokens */
+	--primary-color-high: var(--ob-accent);
+	--primary-color-medium: var(--ob-accent);
+	--primary-color-low: var(--ob-accent-press);
+
+	/* Soften the base greys (used where glass is not applied) */
+	--background-color-s: 0%;
+	--background-color-l: 100%;
+	color-scheme: light;
+}
+
+/* Dark mode — keyed off the [data-darkmode] attribute set by the init script */
+:root[data-darkmode="true"] {
+	--ob-accent: #0a84ff;
+	--ob-accent-press: color-mix(in srgb, var(--ob-accent) 78%, #fff);
+	--ob-on-accent: #ffffff;
+
+	--ob-card: rgba(30, 30, 34, .58);
+	--ob-card-2: rgba(30, 30, 34, .44);
+	--ob-card-strong: rgba(44, 44, 50, .76);
+	--ob-bar: rgba(22, 22, 26, .56);
+	--ob-elevated: rgba(54, 54, 60, .74);
+	--ob-hairline: rgba(255, 255, 255, .12);
+	--ob-hairline-strong: rgba(255, 255, 255, .20);
+	--ob-fill: rgba(120, 120, 128, .24);
+	--ob-fill-hover: rgba(120, 120, 128, .36);
+
+	--ob-text: #f5f5f7;
+	--ob-text-2: #c7c7cc;
+	--ob-text-3: #8e8e93;
+
+	--ob-shadow-1: 0 1px 2px rgba(0, 0, 0, .22);
+	--ob-shadow-2: 0 8px 28px rgba(0, 0, 0, .45);
+	--ob-ring: 0 0 0 .5px rgba(255, 255, 255, .06);
+
+	--ob-wallpaper: linear-gradient(180deg, #161618 0%, #0f0f11 60%, #0a0a0c 100%);
+
+	color-scheme: dark;
+}
+
+/* ----------------------------------------------------------------------------
+   2. Base & wallpaper
+---------------------------------------------------------------------------- */
+html {
+	background: transparent;
+	scroll-behavior: smooth;
+}
+
+body {
+	font-family: var(--ob-font);
+	color: var(--ob-text);
+	background: transparent !important;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	letter-spacing: .1px;
+	min-height: 100vh;
+}
+
+::selection { background: color-mix(in srgb, var(--ob-accent) 28%, transparent); }
+* { accent-color: var(--ob-accent); }
+
+/* The fixed wallpaper layer + readability scrims */
+#ob-bg {
+	position: fixed;
+	inset: -4% -4% -4% -4%;
+	z-index: -2;
+	background-image: var(--ob-wallpaper);
+	background-size: cover;
+	background-position: center;
+	background-repeat: no-repeat;
+	filter: blur(var(--ob-wallpaper-blur)) saturate(1.08);
+	transform: scale(1.06);
+	transition: filter .45s var(--ob-ease), background-image .45s var(--ob-ease);
+	will-change: filter;
+}
+#ob-bg-dim {
+	position: absolute;
+	inset: 0;
+	background:
+		linear-gradient(rgba(0, 0, 0, var(--ob-wallpaper-dim)), rgba(0, 0, 0, var(--ob-wallpaper-dim))),
+		linear-gradient(rgba(255, 255, 255, var(--ob-wallpaper-scrim)), rgba(255, 255, 255, var(--ob-wallpaper-scrim)));
+	transition: background .35s var(--ob-ease);
+}
+
+/* Slim, unobtrusive scrollbars */
+* { scrollbar-width: thin; scrollbar-color: var(--ob-hairline-strong) transparent; }
+*::-webkit-scrollbar { width: 10px; height: 10px; }
+*::-webkit-scrollbar-thumb {
+	background: var(--ob-hairline-strong);
+	border-radius: 980px;
+	border: 3px solid transparent;
+	background-clip: padding-box;
+}
+*::-webkit-scrollbar-thumb:hover { background: var(--ob-text-3); background-clip: padding-box; }
+*::-webkit-scrollbar-track { background: transparent; }
+
+/* ----------------------------------------------------------------------------
+   3. Header — frosted top bar (macOS menu-bar vibe)
+---------------------------------------------------------------------------- */
+header {
+	position: sticky;
+	top: 0;
+	z-index: 1000;
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	min-height: 56px;
+	padding: 0 max(18px, env(safe-area-inset-left)) 0 max(18px, env(safe-area-inset-left));
+	margin: 0;
+	background: var(--ob-bar);
+	-webkit-backdrop-filter: saturate(180%) blur(20px);
+	backdrop-filter: saturate(180%) blur(20px);
+	border: none;
+	border-bottom: .5px solid var(--ob-hairline);
+	box-shadow: 0 1px 0 rgba(255, 255, 255, .04);
+}
+
+header .brand {
+	display: inline-flex;
+	align-items: center;
+	gap: 10px;
+	color: var(--ob-text);
+	font-weight: 600;
+	font-size: 16px;
+	letter-spacing: .2px;
+	padding: 6px 4px;
+	text-decoration: none;
+	border-radius: var(--ob-radius-sm);
+	transition: opacity .2s var(--ob-ease);
+}
+header .brand:hover { opacity: .7; background: transparent; }
+header .ob-brand-logo {
+	width: 26px;
+	height: 26px;
+	border-radius: 7px;
+	box-shadow: var(--ob-shadow-1);
+	flex: 0 0 auto;
+}
+
+/* Top navigation (#topmenu .nav) → translucent pill items */
+header .nav { margin: 0; display: flex; align-items: center; gap: 2px; flex-wrap: wrap; }
+.nav > li { list-style: none; }
+.nav a, .nav a.menu {
+	display: inline-flex;
+	align-items: center;
+	color: var(--ob-text-2);
+	font-size: 13.5px;
+	font-weight: 500;
+	padding: 7px 12px;
+	border-radius: var(--ob-radius-pill);
+	text-decoration: none;
+	line-height: 1;
+	transition: background .18s var(--ob-ease), color .18s var(--ob-ease);
+}
+.nav a:hover, .nav a.menu:hover { background: var(--ob-fill); color: var(--ob-text); }
+.nav .active > a, .nav .active > a.menu {
+	background: var(--ob-fill-hover);
+	color: var(--ob-text);
+}
+
+/* Dropdown menus → floating glass cards */
+.nav .dropdown-menu, .dropdown-menu {
+	position: absolute;
+	z-index: 1200;
+	background: var(--ob-elevated);
+	-webkit-backdrop-filter: blur(var(--ob-glass-blur)) saturate(180%);
+	backdrop-filter: blur(var(--ob-glass-blur)) saturate(180%);
+	border: .5px solid var(--ob-hairline);
+	border-radius: var(--ob-radius);
+	box-shadow: var(--ob-shadow-2), var(--ob-ring);
+	padding: 6px;
+	margin-top: 8px;
+	min-width: 210px;
+	overflow: visible;
+}
+/* Invisible bridge so the cursor can cross the 8px gap without the
+   hover menu collapsing (desktop). */
+.nav .dropdown-menu::before {
+	content: "";
+	position: absolute;
+	top: -10px;
+	left: 0;
+	right: 0;
+	height: 12px;
+}
+/* Click / tap toggled open state (works on touch + keeps it open until you
+   pick an item or click away — driven by obsidian.js). */
+.nav li.dropdown.ob-open > .dropdown-menu,
+.dropdown.ob-open > .dropdown-menu {
+	display: block;
+	left: 0;            /* base parks closed menus at left:-9999px */
+	animation: ob-pop .2s var(--ob-spring) both;
+}
+.dropdown-menu li { list-style: none; }
+.dropdown-menu li a, .nav .dropdown-menu li a {
+	display: block;
+	color: var(--ob-text);
+	padding: 8px 12px;
+	border-radius: 9px;
+	font-size: 13.5px;
+	font-weight: 450;
+	transition: background .15s var(--ob-ease);
+}
+.dropdown-menu li a:hover, .nav .dropdown-menu li a:hover {
+	background: var(--ob-accent);
+	color: var(--ob-on-accent);
+}
+.nav .dropdown-menu .active a { background: var(--ob-fill); color: var(--ob-text); }
+.dropdown:hover ul.dropdown-menu { animation: ob-pop .22s var(--ob-spring) both; }
+
+#indicators { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+#indicators a, header [data-indicator] {
+	color: var(--ob-text-2);
+	font-size: 12.5px;
+	font-weight: 500;
+	padding: 5px 11px;
+	border-radius: var(--ob-radius-pill);
+	background: var(--ob-fill);
+	border: none;
+	text-decoration: none;
+	transition: background .18s var(--ob-ease), transform .12s var(--ob-ease);
+}
+#indicators a:hover, header [data-indicator][data-clickable]:hover { background: var(--ob-fill-hover); }
+#indicators a:active { transform: scale(.96); }
+header [data-indicator][data-style="active"] {
+	background: color-mix(in srgb, var(--ob-accent) 18%, transparent);
+	color: var(--ob-accent);
+}
+
+/* ----------------------------------------------------------------------------
+   4. Main content layout
+---------------------------------------------------------------------------- */
+#maincontent.container, .container {
+	max-width: 1180px;
+	width: auto;
+	margin: 0 auto;
+	padding: 26px max(20px, env(safe-area-inset-left)) 90px;
+	background: transparent;
+}
+
+h1, h2, h3, h4, h5, legend, .cbi-map-descr + h1 {
+	color: var(--ob-text);
+	font-weight: 650;
+	letter-spacing: -.2px;
+}
+.cbi-map > h2, #maincontent > .cbi-map > h2, #view > * > h2, .cbi-map-tabbed + h2 {
+	font-size: 26px;
+	margin: 6px 0 4px;
+}
+.cbi-map-descr, .cbi-section-descr, p.cbi-section-descr {
+	color: var(--ob-text-3);
+	font-size: 13.5px;
+}
+a { color: var(--ob-accent); text-decoration: none; }
+a:hover { text-decoration: underline; text-underline-offset: 2px; }
+
+/* ----------------------------------------------------------------------------
+   5. Tab menu → segmented control
+---------------------------------------------------------------------------- */
+#tabmenu { margin: 14px 0 18px; }
+.tabs, .cbi-tabmenu {
+	display: inline-flex;
+	flex-wrap: wrap;
+	gap: 2px;
+	padding: 4px;
+	margin: 0;
+	border: none;
+	border-radius: var(--ob-radius);
+	background: var(--ob-card-2);
+	-webkit-backdrop-filter: blur(var(--ob-glass-blur)) saturate(160%);
+	backdrop-filter: blur(var(--ob-glass-blur)) saturate(160%);
+	box-shadow: inset 0 0 0 .5px var(--ob-hairline);
+	list-style: none;
+}
+.tabs > li, .cbi-tabmenu > li { list-style: none; border: none; background: none; margin: 0; }
+.tabs > li > a, .cbi-tabmenu > li > a {
+	display: inline-block;
+	color: var(--ob-text-2);
+	font-size: 13px;
+	font-weight: 550;
+	padding: 6px 14px;
+	border-radius: 10px;
+	text-decoration: none;
+	transition: color .18s var(--ob-ease), background .18s var(--ob-ease);
+}
+.tabs > li:not(.active):hover > a { color: var(--ob-text); background: var(--ob-fill); }
+.tabs > li.active > a, .cbi-tabmenu > li.cbi-tab > a {
+	background: var(--ob-card-strong);
+	color: var(--ob-text);
+	box-shadow: var(--ob-shadow-1), var(--ob-ring);
+}
+.tabs > li.active, .cbi-tabmenu > li.active { background: none; }
+
+/* ----------------------------------------------------------------------------
+   6. Sections / cards
+---------------------------------------------------------------------------- */
+.cbi-section,
+.cbi-map > .cbi-section,
+.cbi-section-node-tabbed,
+#view fieldset.cbi-section,
+.panel {
+	position: relative;
+	background: var(--ob-card);
+	-webkit-backdrop-filter: blur(var(--ob-glass-blur)) saturate(170%);
+	backdrop-filter: blur(var(--ob-glass-blur)) saturate(170%);
+	border: .5px solid var(--ob-hairline);
+	border-radius: var(--ob-radius-lg);
+	box-shadow: var(--ob-shadow-1), var(--ob-ring);
+	padding: 20px 22px;
+	margin: 0 0 20px;
+}
+/* Avoid nested cards stacking up */
+.cbi-section .cbi-section,
+.cbi-section .cbi-section-node .cbi-section,
+.cbi-section fieldset {
+	background: transparent;
+	-webkit-backdrop-filter: none;
+	backdrop-filter: none;
+	border: none;
+	box-shadow: none;
+	border-radius: 0;
+	padding: 0;
+	margin: 0 0 8px;
+}
+legend, .cbi-section > h3, .cbi-section-node + h3, .cbi-section > legend {
+	font-size: 16px;
+	font-weight: 650;
+	padding: 0 0 2px;
+	color: var(--ob-text);
+}
+
+/* Form rows → grouped-list rows with hairline separators */
+.cbi-value {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 10px 16px;
+	padding: 12px 0;
+	margin: 0;
+	border: none;
+	border-bottom: .5px solid var(--ob-hairline);
+}
+.cbi-value:last-child, .cbi-value-last { border-bottom: none; }
+.cbi-value-title {
+	flex: 0 0 230px;
+	max-width: 230px;
+	color: var(--ob-text);
+	font-weight: 500;
+	font-size: 13.5px;
+	text-align: left;
+	padding: 0;
+	line-height: 1.35;
+}
+.cbi-value-field { flex: 1 1 320px; min-width: 220px; }
+.cbi-value-description {
+	flex-basis: 100%;
+	color: var(--ob-text-3);
+	font-size: 12px;
+	margin: 2px 0 0;
+}
+
+/* ----------------------------------------------------------------------------
+   7. Form controls — inputs, selects, textareas
+---------------------------------------------------------------------------- */
+input[type="text"], input[type="password"], input[type="search"], input[type="email"],
+input[type="url"], input[type="number"], input[type="tel"], input[type="date"],
+input[type="datetime-local"], input[type="time"], select, textarea,
+.cbi-input-text, .cbi-input-password, .cbi-input-user, .cbi-input-ip,
+.cbi-dynlist > .item, .cbi-dropdown {
+	font-family: var(--ob-font);
+	font-size: 13.5px;
+	color: var(--ob-text);
+	background: var(--ob-fill);
+	border: .5px solid var(--ob-hairline);
+	border-radius: var(--ob-radius-sm);
+	padding: 8px 11px;
+	min-height: 34px;
+	box-shadow: none;
+	outline: none;
+	transition: border-color .18s var(--ob-ease), box-shadow .18s var(--ob-ease), background .18s var(--ob-ease);
+	box-sizing: border-box;
+}
+textarea { line-height: 1.5; padding: 10px 12px; }
+input::placeholder, textarea::placeholder { color: var(--ob-text-3); }
+
+input[type="text"]:focus, input[type="password"]:focus, input[type="search"]:focus,
+input[type="email"]:focus, input[type="url"]:focus, input[type="number"]:focus,
+select:focus, textarea:focus, .cbi-input-text:focus, .cbi-dropdown:focus-within {
+	background: var(--ob-card-strong);
+	border-color: var(--ob-accent);
+	box-shadow: 0 0 0 3.5px color-mix(in srgb, var(--ob-accent) 28%, transparent);
+}
+
+select {
+	-webkit-appearance: none;
+	appearance: none;
+	padding-right: 30px;
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%2386868b' d='M1 1.5 6 6.5 11 1.5'/%3E%3C/svg%3E");
+	background-repeat: no-repeat;
+	background-position: right 11px center;
+}
+
+input[type="checkbox"], input[type="radio"] { width: 17px; height: 17px; cursor: pointer; }
+input[type="range"] { accent-color: var(--ob-accent); }
+
+/* Mono fields (code / textareas of configs) */
+textarea.cbi-input-text, .cbi-input-textarea, pre, code, .cbi-section-table code {
+	font-family: var(--ob-mono);
+}
+
+/* ----------------------------------------------------------------------------
+   8. Buttons
+---------------------------------------------------------------------------- */
+.btn, .cbi-button, button, input[type="submit"], input[type="button"], input[type="reset"] {
+	font-family: var(--ob-font);
+	font-size: 13px;
+	font-weight: 550;
+	line-height: 1;
+	color: var(--ob-text);
+	background: var(--ob-fill);
+	border: .5px solid var(--ob-hairline);
+	border-radius: var(--ob-radius-sm);
+	padding: 9px 16px;
+	min-height: 34px;
+	cursor: pointer;
+	text-decoration: none;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	transition: transform .12s var(--ob-ease), background .18s var(--ob-ease),
+		box-shadow .18s var(--ob-ease), filter .18s var(--ob-ease);
+}
+.btn:hover, .cbi-button:hover, button:hover,
+input[type="submit"]:hover, input[type="button"]:hover { background: var(--ob-fill-hover); }
+.btn:active, .cbi-button:active, button:active { transform: scale(.97); }
+.btn:focus-visible, .cbi-button:focus-visible, button:focus-visible {
+	outline: none;
+	box-shadow: 0 0 0 3.5px color-mix(in srgb, var(--ob-accent) 30%, transparent);
+}
+
+/* Primary / affirmative actions → filled accent */
+.btn.primary, .cbi-button-action, .cbi-button-apply, .cbi-button-save,
+.cbi-button-positive, .cbi-button-add, .important, input.cbi-button-save,
+.cbi-page-actions .cbi-button-apply, .cbi-page-actions .cbi-button-save {
+	color: var(--ob-on-accent);
+	background: var(--ob-accent);
+	border-color: transparent;
+	box-shadow: none;
+}
+.btn.primary:hover, .cbi-button-action:hover, .cbi-button-apply:hover,
+.cbi-button-save:hover, .cbi-button-positive:hover, .cbi-button-add:hover {
+	background: var(--ob-accent);
+	filter: brightness(1.06);
+}
+
+/* Destructive actions */
+.cbi-button-remove, .cbi-button-reset, .cbi-button-negative, .btn.danger {
+	color: #fff;
+	background: #ff3b30;
+	border-color: transparent;
+}
+:root[data-darkmode="true"] .cbi-button-remove,
+:root[data-darkmode="true"] .cbi-button-negative { background: #ff453a; }
+.cbi-button-remove:hover, .cbi-button-negative:hover { filter: brightness(1.06); }
+
+.cbi-page-actions {
+	display: flex;
+	gap: 10px;
+	flex-wrap: wrap;
+	align-items: center;
+	padding: 16px 0 0;
+	margin-top: 6px;
+	border-top: .5px solid var(--ob-hairline);
+	background: transparent;
+}
+
+/* ----------------------------------------------------------------------------
+   9. Tables
+---------------------------------------------------------------------------- */
+.table, table.cbi-section-table, table {
+	width: 100%;
+	border-collapse: separate;
+	border-spacing: 0;
+	background: transparent;
+}
+.th, .td, th, td {
+	padding: 10px 12px;
+	border: none;
+	border-bottom: .5px solid var(--ob-hairline);
+	font-size: 13px;
+	color: var(--ob-text);
+	text-align: left;
+	vertical-align: middle;
+}
+.thead .th, thead th, .cbi-section-table-titles .th {
+	color: var(--ob-text-3);
+	font-weight: 600;
+	font-size: 11.5px;
+	text-transform: uppercase;
+	letter-spacing: .4px;
+	border-bottom: .5px solid var(--ob-hairline-strong);
+}
+.tr:last-child .td, tr:last-child td { border-bottom: none; }
+.tr:hover, tbody tr:hover { background: var(--ob-fill); }
+.tr.cbi-rowstyle-2, .cbi-rowstyle-2 { background: transparent; }
+.tr.table-titles, .tr.cbi-section-table-titles { background: transparent; }
+caption { color: var(--ob-text); font-weight: 650; text-align: left; padding: 0 0 10px; }
+
+/* ----------------------------------------------------------------------------
+   10. Alerts, notifications, badges
+---------------------------------------------------------------------------- */
+.alert-message, .notification {
+	border: .5px solid var(--ob-hairline);
+	border-left: 3px solid var(--ob-accent);
+	border-radius: var(--ob-radius);
+	background: var(--ob-card-strong) !important;
+	-webkit-backdrop-filter: blur(var(--ob-glass-blur));
+	backdrop-filter: blur(var(--ob-glass-blur));
+	box-shadow: var(--ob-shadow-1);
+	color: var(--ob-text) !important;
+	padding: 14px 18px;
+}
+.alert-message h4 { color: var(--ob-text); margin-top: 0; }
+.alert-message.warning, .alert-message.notice {
+	border-left-color: #ff9f0a;
+	background: color-mix(in srgb, #ff9f0a 12%, var(--ob-card-strong)) !important;
+}
+.alert-message.error, .alert-message.danger {
+	border-left-color: #ff3b30;
+	background: color-mix(in srgb, #ff3b30 12%, var(--ob-card-strong)) !important;
+}
+.alert-message.success {
+	border-left-color: #34c759;
+	background: color-mix(in srgb, #34c759 12%, var(--ob-card-strong)) !important;
+}
+
+.label, .badge, .ifacebadge {
+	border-radius: var(--ob-radius-pill);
+	padding: 3px 9px;
+	font-size: 11.5px;
+	font-weight: 600;
+	background: var(--ob-fill);
+	color: var(--ob-text-2);
+	border: .5px solid var(--ob-hairline);
+}
+.label.success, .badge.success { background: color-mix(in srgb, #34c759 22%, transparent); color: #1c8c3d; }
+.label.warning { background: color-mix(in srgb, #ff9f0a 22%, transparent); color: #b5710a; }
+.label.notice { background: color-mix(in srgb, var(--ob-accent) 20%, transparent); color: var(--ob-accent); }
+
+/* Spinner tint */
+.spinning::before { border-top-color: var(--ob-accent) !important; }
+
+/* ----------------------------------------------------------------------------
+   11. Footer
+---------------------------------------------------------------------------- */
+footer {
+	margin: 0;
+	padding: 22px 20px calc(28px + env(safe-area-inset-bottom));
+	text-align: center;
+	color: var(--ob-text-3);
+	font-size: 12px;
+	background: transparent;
+	border: none;
+}
+footer a { color: var(--ob-text-2); }
+footer .ob-footer-mark { font-weight: 600; color: var(--ob-text-3); }
+
+/* ----------------------------------------------------------------------------
+   12. Animations
+---------------------------------------------------------------------------- */
+@keyframes ob-rise {
+	from { opacity: 0; transform: translateY(14px); }
+	to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes ob-pop {
+	from { opacity: 0; transform: translateY(-6px) scale(.98); }
+	to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes ob-fab-in {
+	from { opacity: 0; transform: translateY(16px) scale(.85); }
+	to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes ob-panel-in {
+	from { opacity: 0; transform: translateX(28px) scale(.985); }
+	to   { opacity: 1; transform: translateX(0) scale(1); }
+}
+@keyframes ob-scrim-in { from { opacity: 0; } to { opacity: 1; } }
+
+#maincontent .cbi-section,
+#maincontent > .cbi-map > .cbi-section,
+#maincontent .panel,
+#maincontent .alert-message {
+	animation: ob-rise .55s var(--ob-spring) both;
+}
+#maincontent .cbi-section:nth-of-type(1) { animation-delay: .02s; }
+#maincontent .cbi-section:nth-of-type(2) { animation-delay: .07s; }
+#maincontent .cbi-section:nth-of-type(3) { animation-delay: .12s; }
+#maincontent .cbi-section:nth-of-type(4) { animation-delay: .17s; }
+#maincontent .cbi-section:nth-of-type(n+5) { animation-delay: .2s; }
+
+/* ----------------------------------------------------------------------------
+   13. Control Center — floating button + settings panel
+---------------------------------------------------------------------------- */
+#ob-fab {
+	position: fixed;
+	right: max(22px, env(safe-area-inset-right));
+	bottom: max(22px, env(safe-area-inset-bottom));
+	z-index: 4000;
+	width: 52px;
+	height: 52px;
+	display: grid;
+	place-items: center;
+	border-radius: 50%;
+	border: .5px solid var(--ob-hairline);
+	background: var(--ob-elevated);
+	color: var(--ob-accent);
+	-webkit-backdrop-filter: blur(var(--ob-glass-blur)) saturate(180%);
+	backdrop-filter: blur(var(--ob-glass-blur)) saturate(180%);
+	box-shadow: var(--ob-shadow-2), var(--ob-ring);
+	cursor: pointer;
+	animation: ob-fab-in .5s var(--ob-spring) both .3s;
+	transition: transform .2s var(--ob-spring), box-shadow .2s var(--ob-ease);
+}
+#ob-fab:hover { transform: translateY(-2px) scale(1.04); }
+#ob-fab:active { transform: scale(.94); }
+#ob-fab svg { width: 24px; height: 24px; }
+
+#ob-scrim {
+	position: fixed;
+	inset: 0;
+	z-index: 4001;
+	background: rgba(0, 0, 0, .28);
+	-webkit-backdrop-filter: blur(2px);
+	backdrop-filter: blur(2px);
+	opacity: 0;
+	pointer-events: none;
+	transition: opacity .3s var(--ob-ease);
+}
+#ob-scrim.ob-open { opacity: 1; pointer-events: auto; animation: ob-scrim-in .3s var(--ob-ease); }
+
+#ob-panel {
+	position: fixed;
+	z-index: 4002;
+	top: 0;
+	right: 0;
+	height: 100%;
+	width: min(380px, 92vw);
+	display: flex;
+	flex-direction: column;
+	background: var(--ob-bar);
+	-webkit-backdrop-filter: blur(40px) saturate(180%);
+	backdrop-filter: blur(40px) saturate(180%);
+	border-left: .5px solid var(--ob-hairline);
+	box-shadow: var(--ob-shadow-2);
+	transform: translateX(102%);
+	transition: transform .42s var(--ob-spring);
+	padding: calc(18px + env(safe-area-inset-top)) 0 0;
+}
+#ob-panel.ob-open { transform: translateX(0); }
+
+.ob-panel-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 0 20px 14px;
+	border-bottom: .5px solid var(--ob-hairline);
+}
+.ob-panel-title { font-size: 19px; font-weight: 700; color: var(--ob-text); letter-spacing: -.2px; }
+.ob-panel-close {
+	width: 30px; height: 30px;
+	display: grid; place-items: center;
+	border-radius: 50%;
+	border: none;
+	background: var(--ob-fill);
+	color: var(--ob-text-2);
+	cursor: pointer;
+	font-size: 16px;
+	transition: background .18s var(--ob-ease), transform .12s var(--ob-ease);
+}
+.ob-panel-close:hover { background: var(--ob-fill-hover); }
+.ob-panel-close:active { transform: scale(.9); }
+
+.ob-panel-body {
+	flex: 1 1 auto;
+	overflow-y: auto;
+	padding: 18px 20px calc(26px + env(safe-area-inset-bottom));
+	display: flex;
+	flex-direction: column;
+	gap: 22px;
+}
+.ob-group { display: flex; flex-direction: column; gap: 10px; }
+.ob-group-label {
+	font-size: 11.5px;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: .5px;
+	color: var(--ob-text-3);
+}
+
+/* Segmented control */
+.ob-seg {
+	display: grid;
+	grid-auto-flow: column;
+	grid-auto-columns: 1fr;
+	gap: 2px;
+	padding: 3px;
+	background: var(--ob-fill);
+	border-radius: 11px;
+}
+.ob-seg button {
+	border: none;
+	background: transparent;
+	color: var(--ob-text-2);
+	font-size: 13px;
+	font-weight: 550;
+	padding: 7px 6px;
+	border-radius: 8px;
+	cursor: pointer;
+	min-height: 32px;
+	transition: color .18s var(--ob-ease), background .25s var(--ob-spring), box-shadow .2s var(--ob-ease);
+}
+.ob-seg button[aria-pressed="true"] {
+	background: var(--ob-card-strong);
+	color: var(--ob-text);
+	box-shadow: var(--ob-shadow-1), var(--ob-ring);
+}
+
+/* Accent swatches */
+.ob-swatches { display: flex; flex-wrap: wrap; gap: 12px; }
+.ob-swatch {
+	width: 30px; height: 30px;
+	border-radius: 50%;
+	border: none;
+	cursor: pointer;
+	position: relative;
+	box-shadow: var(--ob-ring), 0 1px 3px rgba(0, 0, 0, .2);
+	transition: transform .18s var(--ob-spring);
+}
+.ob-swatch:hover { transform: scale(1.12); }
+.ob-swatch[aria-pressed="true"] {
+	box-shadow: 0 0 0 2.5px var(--ob-bar), 0 0 0 4.5px currentColor;
+}
+.ob-swatch[aria-pressed="true"]::after {
+	content: "";
+	position: absolute;
+	left: 50%; top: 46%;
+	width: 11px; height: 6px;
+	border-left: 2px solid #fff; border-bottom: 2px solid #fff;
+	transform: translate(-50%, -50%) rotate(-45deg);
+}
+.ob-swatch-custom {
+	display: grid; place-items: center;
+	background: conic-gradient(red, magenta, blue, cyan, lime, yellow, red);
+	color: #fff;
+	overflow: hidden;
+}
+.ob-swatch-custom input[type="color"] {
+	position: absolute; inset: 0; opacity: 0; cursor: pointer; border: none; padding: 0;
+}
+
+/* Wallpaper grid */
+.ob-wp-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.ob-wp {
+	aspect-ratio: 1 / 1.5;
+	border-radius: 12px;
+	border: none;
+	cursor: pointer;
+	position: relative;
+	overflow: hidden;
+	box-shadow: var(--ob-ring), 0 2px 8px rgba(0, 0, 0, .18);
+	background-size: cover;
+	background-position: center;
+	transition: transform .18s var(--ob-spring);
+}
+.ob-wp:hover { transform: scale(1.05); }
+.ob-wp[aria-pressed="true"] { box-shadow: 0 0 0 2.5px var(--ob-bar), 0 0 0 4.5px var(--ob-accent); }
+.ob-wp[aria-pressed="true"]::after {
+	content: "✓";
+	position: absolute; top: 4px; right: 5px;
+	width: 18px; height: 18px;
+	display: grid; place-items: center;
+	font-size: 11px; font-weight: 800; color: #fff;
+	background: var(--ob-accent);
+	border-radius: 50%;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, .4);
+}
+
+.ob-wp-actions { display: flex; gap: 8px; }
+.ob-field {
+	flex: 1 1 auto;
+	font-size: 13px;
+	padding: 8px 11px;
+	min-height: 34px;
+	border-radius: var(--ob-radius-sm);
+	border: .5px solid var(--ob-hairline);
+	background: var(--ob-fill);
+	color: var(--ob-text);
+}
+.ob-btn {
+	font-size: 12.5px;
+	font-weight: 550;
+	padding: 8px 13px;
+	min-height: 34px;
+	border-radius: var(--ob-radius-sm);
+	border: .5px solid var(--ob-hairline);
+	background: var(--ob-fill);
+	color: var(--ob-text);
+	cursor: pointer;
+	white-space: nowrap;
+	transition: background .18s var(--ob-ease), transform .12s var(--ob-ease);
+}
+.ob-btn:hover { background: var(--ob-fill-hover); }
+.ob-btn:active { transform: scale(.96); }
+.ob-btn-accent { background: var(--ob-accent); color: var(--ob-on-accent); border-color: transparent; }
+
+/* Sliders */
+.ob-slider-row { display: flex; align-items: center; gap: 12px; }
+.ob-slider-row label { flex: 0 0 64px; font-size: 13px; color: var(--ob-text-2); font-weight: 500; }
+.ob-range {
+	flex: 1 1 auto;
+	-webkit-appearance: none;
+	appearance: none;
+	height: 6px;
+	border-radius: 980px;
+	background: var(--ob-fill);
+	outline: none;
+}
+.ob-range::-webkit-slider-thumb {
+	-webkit-appearance: none;
+	width: 20px; height: 20px;
+	border-radius: 50%;
+	background: #fff;
+	box-shadow: 0 1px 4px rgba(0, 0, 0, .3), 0 0 0 .5px rgba(0, 0, 0, .08);
+	cursor: pointer;
+	transition: transform .12s var(--ob-ease);
+}
+.ob-range::-webkit-slider-thumb:active { transform: scale(1.15); }
+.ob-range::-moz-range-thumb {
+	width: 20px; height: 20px; border: none; border-radius: 50%;
+	background: #fff; box-shadow: 0 1px 4px rgba(0, 0, 0, .3); cursor: pointer;
+}
+.ob-range-val { flex: 0 0 40px; text-align: right; font-size: 12px; color: var(--ob-text-3); font-variant-numeric: tabular-nums; }
+
+/* iOS-style switch */
+.ob-switch-row {
+	display: flex; align-items: center; justify-content: space-between;
+	gap: 12px; padding: 4px 0;
+}
+.ob-switch-row span { font-size: 13.5px; color: var(--ob-text); font-weight: 450; }
+.ob-switch { position: relative; width: 50px; height: 30px; flex: 0 0 auto; }
+.ob-switch input { position: absolute; opacity: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }
+.ob-switch .ob-switch-track {
+	position: absolute; inset: 0;
+	background: var(--ob-fill-hover);
+	border-radius: 980px;
+	transition: background .25s var(--ob-ease);
+}
+.ob-switch .ob-switch-track::before {
+	content: "";
+	position: absolute; top: 2px; left: 2px;
+	width: 26px; height: 26px;
+	border-radius: 50%;
+	background: #fff;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, .3);
+	transition: transform .26s var(--ob-spring);
+}
+.ob-switch input:checked + .ob-switch-track { background: #34c759; }
+.ob-switch input:checked + .ob-switch-track::before { transform: translateX(20px); }
+
+.ob-panel-foot { display: flex; gap: 10px; padding-top: 4px; }
+.ob-panel-foot .ob-btn { flex: 1 1 auto; }
+
+.ob-hint { font-size: 11.5px; color: var(--ob-text-3); line-height: 1.4; }
+
+/* ----------------------------------------------------------------------------
+   14. Login page polish
+---------------------------------------------------------------------------- */
+.cbi-map.login, form > .cbi-map:only-child, .node-main-login .cbi-section {
+	max-width: 400px;
+	margin: 8vh auto 0;
+}
+
+/* ----------------------------------------------------------------------------
+   15. Accessibility — reduce transparency / reduce motion
+---------------------------------------------------------------------------- */
+:root[data-reduce-transparency] {
+	--ob-card: var(--background-color-high, #fff);
+	--ob-card-2: var(--background-color-high, #fff);
+	--ob-card-strong: var(--background-color-high, #fff);
+	--ob-bar: var(--background-color-high, #fff);
+	--ob-elevated: var(--background-color-high, #fff);
+}
+:root[data-reduce-transparency][data-darkmode="true"] {
+	--ob-card: #1c1c1e;
+	--ob-card-2: #1c1c1e;
+	--ob-card-strong: #2c2c2e;
+	--ob-bar: #1c1c1e;
+	--ob-elevated: #2c2c2e;
+}
+:root[data-reduce-transparency] header,
+:root[data-reduce-transparency] .cbi-section,
+:root[data-reduce-transparency] .dropdown-menu,
+:root[data-reduce-transparency] .tabs,
+:root[data-reduce-transparency] #ob-panel,
+:root[data-reduce-transparency] #ob-fab,
+:root[data-reduce-transparency] .alert-message {
+	-webkit-backdrop-filter: none !important;
+	backdrop-filter: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	*, *::before, *::after {
+		animation-duration: .001ms !important;
+		animation-delay: 0ms !important;
+		transition-duration: .001ms !important;
+		scroll-behavior: auto !important;
+	}
+}
+:root[data-reduce-motion] *,
+:root[data-reduce-motion] *::before,
+:root[data-reduce-motion] *::after {
+	animation-duration: .001ms !important;
+	animation-delay: 0ms !important;
+	transition-duration: .001ms !important;
+}
+
+/* ----------------------------------------------------------------------------
+   16. Responsive
+---------------------------------------------------------------------------- */
+@media (max-width: 920px) {
+	.cbi-value-title { flex-basis: 100%; max-width: none; }
+	.cbi-value-field { flex-basis: 100%; }
+}
+@media (max-width: 680px) {
+	header { gap: 8px; padding: 0 12px; min-height: 52px; }
+	header .brand span { display: none; }
+	#maincontent.container, .container { padding: 18px 14px 96px; }
+	.cbi-section, .cbi-map > .cbi-section { padding: 16px; border-radius: var(--ob-radius); }
+	.nav a, .nav a.menu { padding: 6px 9px; font-size: 13px; }
+	.ob-wp-grid { grid-template-columns: repeat(3, 1fr); }
+}

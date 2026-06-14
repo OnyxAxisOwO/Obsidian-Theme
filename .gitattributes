@@ -1,2 +1,11 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# Files deployed onto the router must keep LF endings (CRLF breaks /bin/sh
+# shebangs and is undesirable in templates/assets), even on a Windows checkout.
+*.ut            text eol=lf
+*.css           text eol=lf
+*.js            text eol=lf
+*.svg           text eol=lf
+Makefile        text eol=lf
+root/etc/uci-defaults/*  text eol=lf

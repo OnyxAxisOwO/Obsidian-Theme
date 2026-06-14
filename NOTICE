@@ -1,0 +1,22 @@
+Obsidian — an Apple-inspired LuCI theme
+Copyright 2026 Obsidian Theme contributors
+
+This product includes software developed as part of the OpenWrt / LuCI project
+(https://github.com/openwrt/luci), licensed under the Apache License, Version 2.0.
+
+The following files are derived from luci-theme-bootstrap and serve as the
+functional base layer of this theme:
+
+  - htdocs/luci-static/obsidian/cascade.css      (from luci-theme-bootstrap, unmodified)
+  - htdocs/luci-static/obsidian/mobile.css       (from luci-theme-bootstrap, unmodified)
+  - htdocs/luci-static/resources/menu-obsidian.js (from resources/menu-bootstrap.js, unmodified)
+  - ucode/template/themes/obsidian/header.ut     (adapted from themes/bootstrap/header.ut)
+  - ucode/template/themes/obsidian/footer.ut     (adapted from themes/bootstrap/footer.ut)
+
+  Copyright 2008 Steven Barth <steven@midlink.org>
+  Copyright 2012 David Menting <david@nut-bolt.nl>
+  Copyright 2008-2022 Jo-Philipp Wich <jo@mein.io>
+
+The Obsidian appearance layer (obsidian.css), the Control Center
+(obsidian.js), the brand mark (logo.svg) and the preview page are original
+work added by this repository, also licensed under the Apache License 2.0.

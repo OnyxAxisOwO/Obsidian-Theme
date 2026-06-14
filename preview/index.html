@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+<meta charset="utf-8">
+<title>OpenWrt | Obsidian 主题预览</title>
+<script>
+/* Mirror of the theme's early-init script (no-flash appearance/accent/wallpaper). */
+(function () {
+	try {
+		var d = document.documentElement, ls = window.localStorage;
+		var get = function (k, f) { try { var v = ls.getItem(k); return v === null ? f : v; } catch (e) { return f; } };
+		var mode = get('obsidian.appearance', 'auto'), mq = window.matchMedia('(prefers-color-scheme: dark)');
+		var apply = function () { var dark = mode === 'dark' ? true : mode === 'light' ? false : mq.matches; d.setAttribute('data-darkmode', dark ? 'true' : 'false'); d.setAttribute('data-appearance', mode); };
+		apply(); if (mode === 'auto') { try { mq.addEventListener('change', apply); } catch (e) { mq.addListener(apply); } }
+		var a = get('obsidian.accent', ''); if (a) d.style.setProperty('--ob-accent', a);
+		var w = get('obsidian.wallpaper', ''); if (w) d.style.setProperty('--ob-wallpaper', w);
+		var b = get('obsidian.blur', ''); if (b !== '') d.style.setProperty('--ob-wallpaper-blur', b + 'px');
+		var dm = get('obsidian.dim', ''); if (dm !== '') d.style.setProperty('--ob-wallpaper-dim', dm);
+		if (get('obsidian.reduceTransparency', '0') === '1') d.setAttribute('data-reduce-transparency', '');
+		if (get('obsidian.reduceMotion', '0') === '1') d.setAttribute('data-reduce-motion', '');
+	} catch (e) {}
+})();
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="stylesheet" href="../htdocs/luci-static/obsidian/cascade.css">
+<link rel="stylesheet" href="../htdocs/luci-static/obsidian/obsidian.css">
+<link rel="icon" href="../htdocs/luci-static/obsidian/logo.svg">
+<script src="../htdocs/luci-static/obsidian/obsidian.js" defer></script>
+</head>
+<body class="lang_zh-cn" data-page="admin-status-overview">
+<div id="ob-bg" aria-hidden="true"><div id="ob-bg-dim"></div></div>
+
+<header>
+	<a class="brand" href="#">
+		<img class="ob-brand-logo" src="../htdocs/luci-static/obsidian/logo.svg" alt="">
+		<span>OpenWrt</span>
+	</a>
+	<ul class="nav" id="topmenu">
+		<li class="active"><a href="#">状态</a></li>
+		<li class="dropdown"><a class="menu" href="#">系统</a>
+			<ul class="dropdown-menu">
+				<li><a href="#">系统设置</a></li>
+				<li class="active"><a href="#">管理权</a></li>
+				<li><a href="#">软件包</a></li>
+				<li><a href="#">启动项</a></li>
+			</ul>
+		</li>
+		<li class="dropdown"><a class="menu" href="#">网络</a>
+			<ul class="dropdown-menu">
+				<li><a href="#">接口</a></li>
+				<li><a href="#">无线</a></li>
+				<li><a href="#">防火墙</a></li>
+				<li><a href="#">DHCP / DNS</a></li>
+			</ul>
+		</li>
+		<li><a href="#">服务</a></li>
+		<li><a href="#">退出登录</a></li>
+	</ul>
+	<div id="indicators" class="pull-right">
+		<a href="#" data-indicator data-style="active">2 项未保存</a>
+		<a href="#">注销</a>
+	</div>
+</header>
+
+<div id="maincontent" class="container">
+
+	<div class="alert-message warning">
+		<h4>未设置密码！</h4>
+		<p>本路由器尚未设置 root 密码，请尽快配置以保护 Web 管理界面。</p>
+		<div class="right"><a class="btn" href="#">前往设置密码…</a></div>
+	</div>
+
+	<h2>状态 · 概览</h2>
+	<p class="cbi-map-descr">实时查看设备运行状况、网络与无线连接信息。点击右下角的按钮可以切换浅色 / 深色、更换壁纸并调节模糊度。</p>
+
+	<div id="tabmenu">
+		<ul class="tabs">
+			<li class="active"><a href="#">概览</a></li>
+			<li><a href="#">防火墙</a></li>
+			<li><a href="#">路由表</a></li>
+			<li><a href="#">系统日志</a></li>
+		</ul>
+	</div>
+
+	<div class="cbi-section">
+		<legend>系统信息</legend>
+		<table class="table">
+			<tr class="tr"><td class="td" style="width:30%">主机名</td><td class="td">OpenWrt</td></tr>
+			<tr class="tr"><td class="td">型号</td><td class="td">Generic x86/64</td></tr>
+			<tr class="tr"><td class="td">固件版本</td><td class="td">OpenWrt 24.10.0 r28427 <span class="label notice">最新</span></td></tr>
+			<tr class="tr"><td class="td">运行时间</td><td class="td">3天 04:18:42</td></tr>
+			<tr class="tr"><td class="td">平均负载</td><td class="td">0.12, 0.08, 0.03</td></tr>
+			<tr class="tr"><td class="td">内存</td><td class="td">已用 312 MB / 1024 MB <span class="label success">31%</span></td></tr>
+		</table>
+	</div>
+
+	<div class="cbi-section">
+		<legend>LAN 接口配置</legend>
+		<p class="cbi-section-descr">演示常见的表单控件在 Obsidian 主题下的样式。</p>
+
+		<div class="cbi-value">
+			<label class="cbi-value-title">主机名</label>
+			<div class="cbi-value-field"><input type="text" class="cbi-input-text" value="OpenWrt" placeholder="主机名"></div>
+		</div>
+		<div class="cbi-value">
+			<label class="cbi-value-title">协议</label>
+			<div class="cbi-value-field">
+				<select>
+					<option>静态地址</option>
+					<option selected>DHCP 客户端</option>
+					<option>PPPoE</option>
+				</select>
+			</div>
+			<div class="cbi-value-description">选择该接口获取地址的方式。</div>
+		</div>
+		<div class="cbi-value">
+			<label class="cbi-value-title">IPv4 地址</label>
+			<div class="cbi-value-field"><input type="text" class="cbi-input-text" value="192.168.1.1"></div>
+		</div>
+		<div class="cbi-value">
+			<label class="cbi-value-title">启用此接口</label>
+			<div class="cbi-value-field"><input type="checkbox" checked> <span style="font-size:13px;color:var(--ob-text-3)">勾选以启用</span></div>
+		</div>
+		<div class="cbi-value">
+			<label class="cbi-value-title">发射功率</label>
+			<div class="cbi-value-field" style="display:flex;align-items:center;gap:12px">
+				<input type="range" min="0" max="100" value="70" style="flex:1"> <span style="font-size:13px;color:var(--ob-text-3)">70%</span>
+			</div>
+		</div>
+		<div class="cbi-value cbi-value-last">
+			<label class="cbi-value-title">附加配置</label>
+			<div class="cbi-value-field"><textarea rows="3" class="cbi-input-text" style="width:100%">option foo 'bar'
+config interface 'lan'</textarea></div>
+		</div>
+
+		<div class="cbi-page-actions">
+			<button class="cbi-button cbi-button-save">保存</button>
+			<button class="cbi-button cbi-button-apply">保存并应用</button>
+			<button class="cbi-button cbi-button-reset">复位</button>
+			<button class="cbi-button cbi-button-remove">删除</button>
+		</div>
+	</div>
+
+	<div class="cbi-section">
+		<legend>已连接的无线设备</legend>
+		<table class="table cbi-section-table">
+			<tr class="tr table-titles cbi-section-table-titles">
+				<th class="th">主机名</th><th class="th">MAC 地址</th><th class="th">信号</th><th class="th">流量</th>
+			</tr>
+			<tr class="tr"><td class="td">iPhone-15</td><td class="td">A4:83:E7:2C:1D:90</td><td class="td"><span class="label success">-48 dBm</span></td><td class="td">1.2 GB</td></tr>
+			<tr class="tr"><td class="td">MacBook-Pro</td><td class="td">F0:18:98:11:42:7A</td><td class="td"><span class="label success">-52 dBm</span></td><td class="td">8.6 GB</td></tr>
+			<tr class="tr"><td class="td">Pixel-Tablet</td><td class="td">3C:22:FB:90:0E:11</td><td class="td"><span class="label warning">-71 dBm</span></td><td class="td">340 MB</td></tr>
+		</table>
+	</div>
+
+</div>
+
+<footer>
+	<span>Powered by <a href="#">LuCI</a> / <a href="#">OpenWrt 24.10.0</a> <span class="ob-footer-mark">· Obsidian</span></span>
+</footer>
+</body>
+</html>

@@ -1,0 +1,131 @@
+{#
+ Obsidian — an Apple-inspired LuCI theme with light/dark modes,
+ customizable wallpaper and adjustable blur.
+
+ Built on the structure of luci-theme-bootstrap.
+ Copyright 2008 Steven Barth <steven@midlink.org>
+ Copyright 2008-2022 Jo-Philipp Wich <jo@mein.io>
+ Copyright 2026 Obsidian Theme contributors
+ Licensed to the public under the Apache License 2.0.
+-#}
+
+{%
+	import { getuid, getspnam } from 'luci.core';
+
+	const boardinfo = ubus.call('system', 'board');
+
+	/* Forced appearance for the explicit light/dark theme variants.
+	   The neutral "obsidian" theme leaves this null so the early-init
+	   script can follow the stored preference / system setting. */
+	const forced = (theme == 'obsidian-dark' ? 'dark'
+	             : (theme == 'obsidian-light' ? 'light' : null));
+
+	http.prepare_content('text/html; charset=UTF-8');
+-%}
+
+<!DOCTYPE html>
+<html lang="{{ dispatcher.lang }}"{{ forced ? ` data-force-appearance="${forced}"` : '' }}>
+	<head>
+		<meta charset="utf-8">
+		<title>{{ striptags(`${boardinfo.hostname ?? '?'}${dispatched?.title ? ` | ${_(dispatched.title)}` : ''}`) }}</title>
+
+		{# Early init: apply appearance / accent / wallpaper / blur before first paint to avoid flashing #}
+		<script>
+		(function () {
+			try {
+				var d = document.documentElement;
+				var force = d.getAttribute('data-force-appearance');
+				var ls = window.localStorage;
+				var get = function (k, f) { try { var v = ls.getItem(k); return (v === null) ? f : v; } catch (e) { return f; } };
+
+				var mode = force || get('obsidian.appearance', 'auto');
+				var mq = window.matchMedia('(prefers-color-scheme: dark)');
+				var apply = function () {
+					var dark = (mode === 'dark') ? true : (mode === 'light') ? false : mq.matches;
+					d.setAttribute('data-darkmode', dark ? 'true' : 'false');
+					d.setAttribute('data-appearance', mode);
+				};
+				apply();
+				if (!force && mode === 'auto') {
+					try { mq.addEventListener('change', apply); }
+					catch (e) { mq.addListener(apply); }
+				}
+
+				var accent = get('obsidian.accent', '');
+				if (accent) d.style.setProperty('--ob-accent', accent);
+
+				var wp = get('obsidian.wallpaper', '');
+				if (wp) d.style.setProperty('--ob-wallpaper', wp);
+
+				var blur = get('obsidian.blur', '');
+				if (blur !== '') d.style.setProperty('--ob-wallpaper-blur', blur + 'px');
+
+				var dim = get('obsidian.dim', '');
+				if (dim !== '') d.style.setProperty('--ob-wallpaper-dim', dim);
+
+				if (get('obsidian.reduceTransparency', '0') === '1') d.setAttribute('data-reduce-transparency', '');
+				if (get('obsidian.reduceMotion', '0') === '1') d.setAttribute('data-reduce-motion', '');
+			} catch (e) {}
+		})();
+		</script>
+
+		<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+		<meta name="darkreader-lock">
+		<link rel="stylesheet" href="{{ media }}/cascade.css">
+		<link rel="stylesheet" media="only screen and (max-device-width: 854px)" href="{{ media }}/mobile.css" />
+		<link rel="stylesheet" href="{{ media }}/obsidian.css">
+		<link rel="icon" href="{{ media }}/logo.svg" sizes="any">
+		{% if (node?.css): %}
+		<link rel="stylesheet" href="{{ resource }}/{{ node.css }}">
+		{% endif %}
+		{% if (css): %}
+		<style title="text/css">{{ css }}</style>
+		{% endif %}
+		<script src="{{ dispatcher.build_url('admin/translations', dispatcher.lang) }}"></script>
+		<script src="{{ resource }}/cbi.js"></script>
+		<script src="{{ media }}/obsidian.js" defer></script>
+	</head>
+
+	<body class="lang_{{ dispatcher.lang }} {{ entityencode(striptags(node?.title ?? ''), true) }}" data-page="{{ entityencode(join('-', ctx.request_path), true) }}">
+		<div id="ob-bg" aria-hidden="true"><div id="ob-bg-dim"></div></div>
+
+		{% if (!blank_page): %}
+		<header>
+			<a class="brand" href="/">
+				<img class="ob-brand-logo" src="{{ media }}/logo.svg" alt="" aria-hidden="true">
+				<span>{{ striptags(boardinfo.hostname ?? '?') }}</span>
+			</a>
+			<ul class="nav" id="topmenu" style="display:none"></ul>
+			<div id="indicators" class="pull-right"></div>
+		</header>
+
+		<div id="maincontent" class="container">
+			{% if (getuid() == 0 && getspnam('root')?.pwdp === ''): %}
+				<div class="alert-message warning">
+					<h4>{{ _('No password set!') }}</h4>
+					<p>{{ _('There is no password set on this router. Please configure a root password to protect the web interface.') }}</p>
+					{% if (dispatcher.lookup("admin/system/admin")): %}
+					  <div class="right"><a class="btn" href="{{ dispatcher.build_url("admin/system/admin") }}">{{ _('Go to password configuration...') }}</a></div>
+					{% endif %}
+				</div>
+			{% endif %}
+
+			{% if (boardinfo.rootfs_type == "initramfs"): %}
+				<div class="alert-message warning">
+					<h4>{{ _('System running in recovery (initramfs) mode.') }}</h4>
+					<p>{{ _('No changes to settings will be stored and are lost after rebooting. This mode should only be used to install a firmware upgrade') }}</p>
+					{% if (dispatcher.lookup("admin/system/flash")): %}
+					  <div class="right"><a class="btn" href="{{ dispatcher.build_url("admin/system/flash") }}">{{ _('Go to firmware upgrade...') }}</a></div>
+					{% endif %}
+				</div>
+			{% endif %}
+
+			<noscript>
+				<div class="alert-message warning">
+					<h4>{{ _('JavaScript required!') }}</h4>
+					<p>{{ _('You must enable JavaScript in your browser or LuCI will not work properly.') }}</p>
+				</div>
+			</noscript>
+
+			<div id="tabmenu" style="display:none"></div>
+		{% endif %}

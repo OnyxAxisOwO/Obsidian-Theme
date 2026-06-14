@@ -1,0 +1,28 @@
+#!/bin/sh
+
+changed=0
+
+set_opt() {
+	local key=$1
+	local val=$2
+
+	if ! uci -q get "luci.$key" >/dev/null 2>&1; then
+		uci set "luci.$key=$val"
+		changed=1
+	fi
+}
+
+set_opt themes.Obsidian /luci-static/obsidian
+
+# Make Obsidian the active theme on fresh installs only.
+# Light/dark is handled inside the theme (Auto / Light / Dark switch),
+# so a single registered theme is enough.
+if [ "$PKG_UPGRADE" != 1 ] && [ $changed = 1 ]; then
+	set_opt main.mediaurlbase /luci-static/obsidian
+fi
+
+if [ $changed = 1 ]; then
+	uci commit luci
+fi
+
+exit 0
