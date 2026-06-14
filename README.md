@@ -1,6 +1,6 @@
-# Obsidian — 一款苹果风格的 OpenWrt / LuCI 主题
+# Obsidian — 一款简洁现代的 OpenWrt / LuCI 主题
 
-> An Apple‑inspired theme for OpenWrt's LuCI web interface — clean monochrome by
+> A clean, modern theme for OpenWrt's LuCI web interface — pure monochrome by
 > default, optional **Material You** dynamic colour, light / dark mode,
 > customizable wallpaper (blur, dim, fit), adjustable content width and elegant
 > motion. Pure front‑end: no backend changes.
@@ -23,7 +23,7 @@
 
 ---
 
-Obsidian 把 macOS / iOS 的克制美学带到 OpenWrt 路由器后台，默认是**纯黑白高级感**，也可一键开启 **Material You** 整体着色：
+Obsidian 为 OpenWrt 路由器后台带来简洁克制的现代美学，默认是**纯黑白高级感**，也可一键开启 **Material You** 整体着色：
 
 - 🌗 **浅色 / 深色 / 自动**：跟随系统，或在内置「设置」面板里一键切换，**无加载闪烁**。
 - 🎨 **Material You 主题色**：选一个种子色，按 M3 色调方案自动生成强调色；开启**「全局着色」**后，背景 / 容器 / 顶栏 / 标签 / 边框 / 文字会一起按色相协调着色（明暗各取合适色调）。默认开启，不选色时保持纯黑白。

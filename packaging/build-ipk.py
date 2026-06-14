@@ -26,7 +26,7 @@ PKG_NAME = "luci-theme-obsidian"
 VERSION = "1.0.5-1"
 ARCH = "all"
 MAINTAINER = "Obsidian Theme contributors"
-DESCRIPTION = "Obsidian - an Apple-inspired LuCI theme (light/dark mode, custom wallpaper, adjustable blur, accent colours)."
+DESCRIPTION = "Obsidian - a clean modern LuCI theme (light/dark mode, custom wallpaper, adjustable blur, accent colours)."
 DEPENDS = "luci-base"
 SECTION = "luci"
 # Fixed timestamp for reproducible archives (2025-01-01 UTC).
