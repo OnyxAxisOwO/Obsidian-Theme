@@ -2,9 +2,13 @@
 <html lang="zh-cn">
 <head>
 <meta charset="utf-8">
-<title>OpenWrt | Obsidian 主题预览</title>
+<title>OpenWrt · Obsidian 主题在线预览</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Obsidian — 一款简洁现代的 OpenWrt / LuCI 主题。这是一个完全可交互的在线预览：切换深浅色、Material You 主题色、更换壁纸，并浏览真实的路由器后台页面。">
+<meta name="theme-color" content="#f2f2f5" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#050505" media="(prefers-color-scheme: dark)">
 <script>
-/* Mirror of the theme's early-init script (no-flash appearance/accent/wallpaper). */
+/* Early-init (no-flash): identical tonal engine to the theme's header.ut / obsidian.js. */
 (function () {
 	try {
 		var d = document.documentElement, ls = window.localStorage;
@@ -42,165 +46,616 @@
 	} catch (e) {}
 })();
 </script>
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="stylesheet" href="../htdocs/luci-static/obsidian/cascade.css">
 <link rel="stylesheet" href="../htdocs/luci-static/obsidian/obsidian.css">
 <link rel="icon" href="../htdocs/luci-static/obsidian/logo.svg">
 <script src="../htdocs/luci-static/obsidian/obsidian.js" defer></script>
+<style>
+/* ---- preview-only extras (use the theme's own tokens so they re-skin too) ---- */
+.demo-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(168px, 1fr)); gap: 14px; }
+.demo-tile { display: flex; align-items: center; gap: 14px; padding: 16px 18px; border: 1px solid var(--ob-hairline); border-radius: var(--ob-radius-lg); background: var(--ob-card-2); }
+.demo-tile .t-label { font-size: 12px; color: var(--ob-text-3); margin-bottom: 3px; }
+.demo-tile .t-value { font-size: 22px; font-weight: 680; letter-spacing: -.4px; color: var(--ob-text); line-height: 1.1; }
+.demo-tile .t-sub { font-size: 11.5px; color: var(--ob-text-3); margin-top: 3px; }
+.demo-gauge { width: 56px; height: 56px; flex: 0 0 auto; }
+.demo-gauge circle { fill: none; stroke-width: 5.5; }
+.demo-gauge .g-track { stroke: var(--ob-hairline-strong); opacity: .55; }
+.demo-gauge .g-val { stroke: var(--ob-accent); stroke-linecap: round; transform: rotate(-90deg); transform-origin: 50% 50%; transition: stroke-dasharray .7s var(--ob-spring); }
+.demo-gauge text { fill: var(--ob-text); font: 700 15px var(--ob-font); }
+.sig { display: inline-flex; align-items: flex-end; gap: 2px; height: 15px; vertical-align: middle; }
+.sig i { width: 3px; background: var(--ob-hairline-strong); border-radius: 1px; }
+.sig i.on { background: var(--ob-accent); }
+.sig i:nth-child(1) { height: 5px; } .sig i:nth-child(2) { height: 8px; } .sig i:nth-child(3) { height: 11px; } .sig i:nth-child(4) { height: 15px; }
+.demo-log { font-family: var(--ob-mono); font-size: 12px; line-height: 1.75; color: var(--ob-text-2); background: var(--ob-fill); border: 1px solid var(--ob-hairline); border-radius: var(--ob-radius); padding: 14px 16px; max-height: 420px; overflow: auto; white-space: pre-wrap; word-break: break-word; }
+.demo-log b { color: var(--ob-text); font-weight: 600; }
+.dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--ob-text-3); margin-right: 7px; vertical-align: middle; }
+.dot.up { background: #34c759; } .dot.down { background: var(--ob-text-3); }
+.demo-hero { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.demo-hero .hero-logo { width: 44px; height: 44px; border-radius: 11px; }
+.demo-row-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 2px; }
+.muted { color: var(--ob-text-3); }
+.demo-banner {
+	display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+	margin: 0 auto 18px; max-width: var(--ob-content-width);
+	padding: 9px 16px; border-radius: var(--ob-radius-pill);
+	background: color-mix(in srgb, var(--ob-accent) 12%, var(--ob-card));
+	border: 1px solid var(--ob-hairline); font-size: 12.5px; color: var(--ob-text-2);
+}
+.demo-banner b { color: var(--ob-text); font-weight: 600; }
+.demo-banner .bx { margin-left: auto; display: flex; gap: 8px; flex-wrap: wrap; }
+.demo-banner a.bx-link { color: var(--ob-accent); font-weight: 600; }
+:root[data-darkmode="true"] .demo-banner a.bx-link { color: var(--ob-text); }
+.toast {
+	position: fixed; left: 50%; bottom: 30px; transform: translate(-50%, 18px); z-index: 5000;
+	background: var(--ob-text); color: var(--ob-bg); font-size: 13px; font-weight: 550;
+	padding: 11px 18px 11px 16px; border-radius: var(--ob-radius-pill); box-shadow: var(--ob-shadow-2);
+	opacity: 0; pointer-events: none; display: inline-flex; align-items: center; gap: 9px; max-width: 80vw;
+	transition: opacity .3s var(--ob-ease), transform .35s var(--ob-spring);
+}
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+.toast svg { width: 16px; height: 16px; flex: 0 0 auto; }
+.inline-input { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.inline-input input { flex: 1 1 220px; }
+.grow { flex: 1 1 auto; }
+</style>
 </head>
 <body class="lang_zh-cn" data-page="admin-status-overview">
 <div id="ob-bg" aria-hidden="true"><div id="ob-bg-dim"></div></div>
 
 <header>
-	<a class="brand" href="#">
+	<a class="brand" href="#/overview" data-route="overview">
 		<img class="ob-brand-logo" src="../htdocs/luci-static/obsidian/logo.svg" alt="">
 		<span>OpenWrt</span>
 	</a>
 	<ul class="nav" id="topmenu">
-		<li class="active"><a href="#">状态</a></li>
+		<li class="dropdown"><a class="menu" href="#">状态</a>
+			<ul class="dropdown-menu">
+				<li><a href="#/overview"  data-route="overview">概览</a></li>
+				<li><a href="#/routes"    data-route="routes">路由表</a></li>
+				<li><a href="#/syslog"    data-route="syslog">系统日志</a></li>
+			</ul>
+		</li>
 		<li class="dropdown"><a class="menu" href="#">系统</a>
 			<ul class="dropdown-menu">
-				<li><a href="#">系统设置</a></li>
-				<li class="active"><a href="#">管理权</a></li>
-				<li><a href="#">软件包</a></li>
-				<li><a href="#">启动项</a></li>
+				<li><a href="#/system"    data-route="system">系统设置</a></li>
+				<li><a href="#/admin"     data-route="admin">管理权</a></li>
+				<li><a href="#/software"  data-route="software">软件包</a></li>
+				<li><a href="#/startup"   data-route="startup">启动项</a></li>
 			</ul>
 		</li>
 		<li class="dropdown"><a class="menu" href="#">网络</a>
 			<ul class="dropdown-menu">
-				<li><a href="#">接口</a></li>
-				<li><a href="#">无线</a></li>
-				<li><a href="#">防火墙</a></li>
-				<li><a href="#">DHCP / DNS</a></li>
+				<li><a href="#/interfaces" data-route="interfaces">接口</a></li>
+				<li><a href="#/wireless"   data-route="wireless">无线</a></li>
+				<li><a href="#/dhcp"       data-route="dhcp">DHCP / DNS</a></li>
+				<li><a href="#/firewall"   data-route="firewall">防火墙</a></li>
 			</ul>
 		</li>
-		<li><a href="#">服务</a></li>
-		<li><a href="#">退出登录</a></li>
+		<li><a href="#/services" data-route="services">服务</a></li>
+		<li><a href="#/login" data-route="login">退出登录</a></li>
 	</ul>
 	<div id="indicators" class="pull-right">
-		<a href="#" data-indicator data-style="active">2 项未保存</a>
-		<a href="#">注销</a>
+		<a href="#" data-indicator data-style="active" id="ind-unsaved">0 项未保存</a>
+		<a href="#/login" data-route="login">注销</a>
 	</div>
 </header>
 
-<div id="maincontent" class="container">
-
-	<div class="alert-message warning">
-		<h4>未设置密码！</h4>
-		<p>本路由器尚未设置 root 密码，请尽快配置以保护 Web 管理界面。</p>
-		<div class="right"><a class="btn" href="#">前往设置密码…</a></div>
-	</div>
-
-	<h2>状态 · 概览</h2>
-	<p class="cbi-map-descr">实时查看设备运行状况、网络与无线连接信息。点击右下角的按钮可以切换浅色 / 深色、更换壁纸并调节模糊度。</p>
-
-	<div id="tabmenu">
-		<ul class="tabs">
-			<li class="active"><a href="#">概览</a></li>
-			<li><a href="#">防火墙</a></li>
-			<li><a href="#">路由表</a></li>
-			<li><a href="#">系统日志</a></li>
-		</ul>
-	</div>
-
-	<!-- Mirrors the iStoreOS unishare page that showed truncated tabs + misaligned labels -->
-	<ul class="cbi-tabmenu map">
-		<li class="cbi-tab"><a href="#">统一共享</a></li>
-		<li class="cbi-tab-disabled"><a href="#">用户</a></li>
-	</ul>
-
-	<div class="cbi-section">
-		<legend>全局</legend>
-		<ul class="cbi-tabmenu">
-			<li class="cbi-tab"><a href="#">常规设置</a></li>
-			<li class="cbi-tab-disabled"><a href="#">WebDAV 设置</a></li>
-		</ul>
-		<div class="cbi-value">
-			<label class="cbi-value-title">启用</label>
-			<div class="cbi-value-field"><input type="checkbox"></div>
-		</div>
-		<div class="cbi-value cbi-value-last">
-			<label class="cbi-value-title">允许匿名用户</label>
-			<div class="cbi-value-field"><input type="checkbox" checked></div>
-			<div class="cbi-value-description">对于登录用户，请在 '用户' 页面进行管理。</div>
-		</div>
-	</div>
-
-	<div class="cbi-section">
-		<legend>系统信息</legend>
-		<table class="table">
-			<tr class="tr"><td class="td" style="width:30%">主机名</td><td class="td">OpenWrt</td></tr>
-			<tr class="tr"><td class="td">型号</td><td class="td">Generic x86/64</td></tr>
-			<tr class="tr"><td class="td">固件版本</td><td class="td">OpenWrt 24.10.0 r28427 <span class="label notice">最新</span></td></tr>
-			<tr class="tr"><td class="td">运行时间</td><td class="td">3天 04:18:42</td></tr>
-			<tr class="tr"><td class="td">平均负载</td><td class="td">0.12, 0.08, 0.03</td></tr>
-			<tr class="tr"><td class="td">内存</td><td class="td">已用 312 MB / 1024 MB <span class="label success">31%</span></td></tr>
-		</table>
-	</div>
-
-	<div class="cbi-section">
-		<legend>LAN 接口配置</legend>
-		<p class="cbi-section-descr">演示常见的表单控件在 Obsidian 主题下的样式。</p>
-
-		<div class="cbi-value">
-			<label class="cbi-value-title">主机名</label>
-			<div class="cbi-value-field"><input type="text" class="cbi-input-text" value="OpenWrt" placeholder="主机名"></div>
-		</div>
-		<div class="cbi-value">
-			<label class="cbi-value-title">协议</label>
-			<div class="cbi-value-field">
-				<select>
-					<option>静态地址</option>
-					<option selected>DHCP 客户端</option>
-					<option>PPPoE</option>
-				</select>
-			</div>
-			<div class="cbi-value-description">选择该接口获取地址的方式。</div>
-		</div>
-		<div class="cbi-value">
-			<label class="cbi-value-title">IPv4 地址</label>
-			<div class="cbi-value-field"><input type="text" class="cbi-input-text" value="192.168.1.1"></div>
-		</div>
-		<div class="cbi-value">
-			<label class="cbi-value-title">启用此接口</label>
-			<div class="cbi-value-field"><input type="checkbox" checked> <span style="font-size:13px;color:var(--ob-text-3)">勾选以启用</span></div>
-		</div>
-		<div class="cbi-value">
-			<label class="cbi-value-title">发射功率</label>
-			<div class="cbi-value-field" style="display:flex;align-items:center;gap:12px">
-				<input type="range" min="0" max="100" value="70" style="flex:1"> <span style="font-size:13px;color:var(--ob-text-3)">70%</span>
-			</div>
-		</div>
-		<div class="cbi-value cbi-value-last">
-			<label class="cbi-value-title">附加配置</label>
-			<div class="cbi-value-field"><textarea rows="3" class="cbi-input-text" style="width:100%">option foo 'bar'
-config interface 'lan'</textarea></div>
-		</div>
-
-		<div class="cbi-page-actions">
-			<button class="cbi-button cbi-button-save">保存</button>
-			<button class="cbi-button cbi-button-apply">保存并应用</button>
-			<button class="cbi-button cbi-button-reset">复位</button>
-			<button class="cbi-button cbi-button-remove">删除</button>
-		</div>
-	</div>
-
-	<div class="cbi-section">
-		<legend>已连接的无线设备</legend>
-		<table class="table cbi-section-table">
-			<tr class="tr table-titles cbi-section-table-titles">
-				<th class="th">主机名</th><th class="th">MAC 地址</th><th class="th">信号</th><th class="th">流量</th>
-			</tr>
-			<tr class="tr"><td class="td">iPhone-15</td><td class="td">A4:83:E7:2C:1D:90</td><td class="td"><span class="label success">-48 dBm</span></td><td class="td">1.2 GB</td></tr>
-			<tr class="tr"><td class="td">MacBook-Pro</td><td class="td">F0:18:98:11:42:7A</td><td class="td"><span class="label success">-52 dBm</span></td><td class="td">8.6 GB</td></tr>
-			<tr class="tr"><td class="td">Pixel-Tablet</td><td class="td">3C:22:FB:90:0E:11</td><td class="td"><span class="label warning">-71 dBm</span></td><td class="td">340 MB</td></tr>
-		</table>
-	</div>
-
+<div class="demo-banner">
+	<span><span class="dot up"></span> 这是 <b>Obsidian</b> 主题的在线预览 — 全部页面与控件均可点击体验。</span>
+	<span class="bx">
+		<a class="bx-link" href="https://github.com/OnyxAxisOwO/Obsidian-Theme" target="_blank" rel="noreferrer">GitHub ↗</a>
+		<a class="bx-link" href="https://github.com/OnyxAxisOwO/Obsidian-Theme/releases/latest" target="_blank" rel="noreferrer">下载 .ipk ↗</a>
+		<span class="muted">右下角 ⚙ 打开「设置」</span>
+	</span>
 </div>
 
+<div id="maincontent" class="container"><!-- rendered by the demo router --></div>
+
 <footer>
-	<span>Powered by <a href="#">LuCI</a> / <a href="#">OpenWrt 24.10.0</a> <span class="ob-footer-mark">· Obsidian</span></span>
+	<span>Powered by <a href="#/overview" data-route="overview">LuCI</a> / OpenWrt 24.10.0 <span class="ob-footer-mark">· Obsidian</span></span>
 </footer>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* =====================================================================
+   Demo router — drives the multi-page LuCI mock. No backend; every
+   control is wired so the showcase feels like a real router admin.
+   ===================================================================== */
+(function () {
+	"use strict";
+	var mc = document.getElementById("maincontent");
+	var toastEl = document.getElementById("toast");
+	var toastTimer = null;
+	var CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
+	var unsaved = 0;
+
+	function toast(msg, withCheck) {
+		toastEl.innerHTML = (withCheck === false ? "" : CHECK) + "<span></span>";
+		toastEl.querySelector("span").textContent = msg;
+		toastEl.classList.add("show");
+		clearTimeout(toastTimer);
+		toastTimer = setTimeout(function () { toastEl.classList.remove("show"); }, 2200);
+	}
+	function setUnsaved(n) {
+		unsaved = Math.max(0, n);
+		var el = document.getElementById("ind-unsaved");
+		if (el) el.textContent = unsaved + " 项未保存";
+	}
+
+	/* ---- reusable fragments ---- */
+	function actions(opts) {
+		opts = opts || {};
+		var btns = "";
+		btns += '<button class="cbi-button cbi-button-save" data-act="save">保存</button>';
+		btns += '<button class="cbi-button cbi-button-apply" data-act="apply">保存并应用</button>';
+		btns += '<button class="cbi-button cbi-button-reset" data-act="reset">复位</button>';
+		if (opts.remove) btns += '<button class="cbi-button cbi-button-remove" data-act="remove">删除</button>';
+		return '<div class="cbi-page-actions">' + btns + '</div>';
+	}
+	function row(title, field, desc, last) {
+		return '<div class="cbi-value' + (last ? ' cbi-value-last' : '') + '">' +
+			'<label class="cbi-value-title">' + title + '</label>' +
+			'<div class="cbi-value-field">' + field + '</div>' +
+			(desc ? '<div class="cbi-value-description">' + desc + '</div>' : '') + '</div>';
+	}
+	function sw(checked) { return '<input type="checkbox"' + (checked ? ' checked' : '') + '>'; }
+	function sel(opts) { return '<select>' + opts.map(function (o) {
+		return '<option' + (o[1] ? ' selected' : '') + '>' + o[0] + '</option>'; }).join("") + '</select>'; }
+	function txt(v, ph) { return '<input type="text" class="cbi-input-text" value="' + (v || "") + '"' + (ph ? ' placeholder="' + ph + '"' : '') + '>'; }
+	function gauge(pct, label) {
+		return '<svg class="demo-gauge" viewBox="0 0 56 56"><circle class="g-track" cx="28" cy="28" r="23" pathLength="100"/>' +
+			'<circle class="g-val" cx="28" cy="28" r="23" pathLength="100" stroke-dasharray="' + pct + ' 100"/>' +
+			'<text x="28" y="33" text-anchor="middle">' + (label || (pct + "%")) + '</text></svg>';
+	}
+	function sigbars(n) {
+		var s = '<span class="sig">';
+		for (var i = 1; i <= 4; i++) s += '<i' + (i <= n ? ' class="on"' : '') + '></i>';
+		return s + '</span>';
+	}
+
+	/* ---- data ---- */
+	var CLIENTS = [
+		["iPhone 15 Pro",  "192.168.1.142", "a4:83:e7:2c:1d:90", -47, 4, "1.9 GB"],
+		["MacBook-Pro",    "192.168.1.108", "f0:18:98:11:42:7a", -53, 4, "12.4 GB"],
+		["Pixel-Tablet",   "192.168.1.156", "3c:22:fb:90:0e:11", -69, 2, "330 MB"],
+		["NAS-Synology",   "192.168.1.10",  "00:11:32:aa:bc:de", null, 0, "88.0 GB"],
+		["ESP32-Sensor",   "192.168.1.201", "24:6f:28:11:02:9c", -74, 1, "12 MB"]
+	];
+	var LEASES = [
+		["iPhone-15-Pro", "192.168.1.142", "a4:83:e7:2c:1d:90", "11h 32m"],
+		["MacBook-Pro",   "192.168.1.108", "f0:18:98:11:42:7a", "9h 04m"],
+		["Pixel-Tablet",  "192.168.1.156", "3c:22:fb:90:0e:11", "5h 47m"]
+	];
+	var PACKAGES = [
+		["luci-base", "24.10.0", "LuCI 核心库"],
+		["luci-theme-obsidian", "1.0.5-1", "Obsidian 主题"],
+		["luci-app-firewall", "24.10.0", "防火墙配置界面"],
+		["dnsmasq-full", "2.90-3", "DNS / DHCP 服务"],
+		["wpad-openssl", "2024-03", "无线认证守护进程"],
+		["kmod-nft-offload", "6.6.52", "硬件流量卸载"]
+	];
+	var SERVICES = [
+		["dnsmasq",  "DNS 与 DHCP 服务器", true],
+		["firewall", "网络防火墙 (nftables)", true],
+		["uhttpd",   "Web 服务器 (LuCI)", true],
+		["dropbear", "SSH 服务器", true],
+		["openvpn",  "OpenVPN 隧道", false]
+	];
+
+	/* ---- pages ---- */
+	var P = {};
+
+	P.overview = { title: "状态 · 概览", render: function () {
+		var clientRows = CLIENTS.map(function (c) {
+			return '<tr class="tr"><td class="td">' + c[0] + '</td><td class="td">' + c[1] +
+				'</td><td class="td"><code>' + c[2] + '</code></td><td class="td">' +
+				(c[3] == null ? '<span class="dot down"></span><span class="muted">有线</span>'
+					: sigbars(c[4]) + ' <span class="muted">' + c[3] + ' dBm</span>') +
+				'</td><td class="td">' + c[5] + '</td></tr>';
+		}).join("");
+		var leaseRows = LEASES.map(function (l) {
+			return '<tr class="tr"><td class="td">' + l[0] + '</td><td class="td">' + l[1] +
+				'</td><td class="td"><code>' + l[2] + '</code></td><td class="td">' + l[3] + '</td></tr>';
+		}).join("");
+		return '' +
+		'<div class="alert-message warning">' +
+			'<h4>未设置密码</h4>' +
+			'<p>本路由器尚未设置管理密码。请尽快设置以保护 Web 管理界面。</p>' +
+			'<div class="demo-row-actions"><a class="btn" href="#/admin" data-route="admin">前往设置密码…</a></div>' +
+		'</div>' +
+
+		'<h2>状态 · 概览</h2>' +
+		'<p class="cbi-map-descr">实时查看设备运行状况、网络与无线连接信息。点击顶栏菜单浏览各个页面，或点右下角 ⚙ 切换深浅色、Material You 主题色与壁纸。</p>' +
+
+		'<div class="cbi-section">' +
+			'<div class="demo-hero">' +
+				'<img class="hero-logo" src="../htdocs/luci-static/obsidian/logo.svg" alt="">' +
+				'<div class="grow"><div style="font-size:18px;font-weight:680">OpenWrt 24.10.0</div>' +
+				'<div class="muted" style="font-size:12.5px">Generic x86/64 · 内核 6.6.52 · <span class="label success">在线</span></div></div>' +
+				'<div class="demo-row-actions"><button class="cbi-button cbi-button-apply" data-toast="正在重启路由器…">重启</button>' +
+				'<button class="cbi-button" data-toast="已请求备份配置">备份配置</button></div>' +
+			'</div>' +
+		'</div>' +
+
+		'<div class="cbi-section"><legend>系统</legend>' +
+			'<div class="demo-grid">' +
+				'<div class="demo-tile"><div><div class="t-label">运行时间</div><div class="t-value">3天 04:18</div><div class="t-sub">自上次重启</div></div></div>' +
+				'<div class="demo-tile"><div><div class="t-label">平均负载</div><div class="t-value">0.12</div><div class="t-sub">0.08 · 0.03</div></div></div>' +
+				'<div class="demo-tile">' + gauge(31) + '<div><div class="t-label">内存</div><div class="t-value">312 MB</div><div class="t-sub">共 1024 MB</div></div></div>' +
+				'<div class="demo-tile">' + gauge(45) + '<div><div class="t-label">存储</div><div class="t-value">1.8 GB</div><div class="t-sub">共 4.0 GB</div></div></div>' +
+				'<div class="demo-tile"><div><div class="t-label">已连接设备</div><div class="t-value">7</div><div class="t-sub">5 无线 · 2 有线</div></div></div>' +
+				'<div class="demo-tile"><div><div class="t-label">实时速率</div><div class="t-value">38.6<span style="font-size:13px;font-weight:500"> Mbps</span></div><div class="t-sub">↓ 下行 · WAN</div></div></div>' +
+			'</div>' +
+		'</div>' +
+
+		'<div class="cbi-section"><legend>网络</legend>' +
+			'<table class="table">' +
+				'<tr class="tr table-titles"><th class="th">接口</th><th class="th">协议</th><th class="th">地址</th><th class="th">状态</th></tr>' +
+				'<tr class="tr"><td class="td"><b>WAN</b></td><td class="td">DHCP 客户端</td><td class="td">203.0.113.24</td><td class="td"><span class="dot up"></span>已连接 · 3天</td></tr>' +
+				'<tr class="tr"><td class="td"><b>LAN</b></td><td class="td">静态地址</td><td class="td">192.168.1.1/24</td><td class="td"><span class="dot up"></span>运行中</td></tr>' +
+				'<tr class="tr"><td class="td"><b>WAN6</b></td><td class="td">DHCPv6</td><td class="td">2001:db8::1/64</td><td class="td"><span class="dot up"></span>已连接</td></tr>' +
+			'</table>' +
+		'</div>' +
+
+		'<div class="cbi-section"><legend>已连接的无线 / 有线设备</legend>' +
+			'<table class="table cbi-section-table">' +
+				'<tr class="tr table-titles cbi-section-table-titles"><th class="th">主机名</th><th class="th">IPv4</th><th class="th">MAC 地址</th><th class="th">信号</th><th class="th">流量</th></tr>' +
+				clientRows +
+			'</table>' +
+		'</div>' +
+
+		'<div class="cbi-section"><legend>DHCP 租约</legend>' +
+			'<table class="table"><tr class="tr table-titles"><th class="th">主机名</th><th class="th">IPv4</th><th class="th">MAC 地址</th><th class="th">剩余租期</th></tr>' +
+			leaseRows + '</table>' +
+		'</div>';
+	}};
+
+	P.interfaces = { title: "网络 · 接口", render: function () {
+		function ifaceForm(name, proto, ip) {
+			return '<div class="tabpane" data-pane="' + name + '"' + (name === "LAN" ? "" : ' hidden') + '>' +
+				row("协议", sel([["静态地址", proto === "static"], ["DHCP 客户端", proto === "dhcp"], ["PPPoE", false]]), "选择该接口获取地址的方式。") +
+				row("IPv4 地址", txt(ip)) +
+				row("IPv4 子网掩码", sel([["255.255.255.0", true], ["255.255.0.0", false]])) +
+				(name === "WAN" ? row("默认网关", txt("203.0.113.1")) : "") +
+				row("启用此接口", sw(true) + ' <span class="muted" style="font-size:12.5px">接口将在开机时自动启动</span>', null, true) +
+				actions({ remove: true });
+		}
+		return '<h2>网络 · 接口</h2>' +
+		'<p class="cbi-map-descr">配置网络接口的协议、地址与防火墙区域。下面的标签页可切换不同接口。</p>' +
+		'<div id="tabmenu"><ul class="tabs" data-tabs>' +
+			'<li class="active"><a href="#" data-tab="LAN">LAN</a></li>' +
+			'<li><a href="#" data-tab="WAN">WAN</a></li>' +
+			'<li><a href="#" data-tab="WAN6">WAN6</a></li>' +
+		'</ul></div>' +
+		'<div class="cbi-section"><legend>接口配置</legend>' +
+			ifaceForm("LAN", "static", "192.168.1.1") +
+			ifaceForm("WAN", "dhcp", "203.0.113.24") +
+			ifaceForm("WAN6", "dhcp", "2001:db8::1") +
+		'</div>';
+	}};
+
+	P.wireless = { title: "网络 · 无线", render: function () {
+		var stations = CLIENTS.filter(function (c) { return c[3] != null; }).map(function (c) {
+			return '<tr class="tr"><td class="td">' + c[0] + '</td><td class="td"><code>' + c[2] + '</code></td><td class="td">' +
+				sigbars(c[4]) + ' ' + c[3] + ' dBm</td><td class="td">' + (130 + c[4] * 100) + ' Mbit/s</td></tr>';
+		}).join("");
+		return '<h2>网络 · 无线</h2>' +
+		'<p class="cbi-map-descr">管理 2.4GHz / 5GHz 射频与 SSID。修改后点击「保存并应用」生效。</p>' +
+		'<div class="cbi-section"><legend>射频 radio0 · 802.11ax · 5 GHz</legend>' +
+			row("信道", sel([["自动", false], ["36 (5180 MHz)", true], ["44", false], ["149", false]])) +
+			row("频宽", sel([["20 MHz", false], ["40 MHz", false], ["80 MHz", true], ["160 MHz", false]])) +
+			row("发射功率", '<div class="inline-input"><input type="range" min="0" max="100" value="78" class="grow" data-out="#txp"> <span id="txp" class="muted" style="min-width:46px;text-align:right">78%</span></div>', "实际功率受所在地区法规限制。", true) +
+		'</div>' +
+		'<div class="cbi-section"><legend>无线网络 SSID</legend>' +
+			row("SSID（网络名称）", txt("Obsidian-5G")) +
+			row("模式", sel([["接入点 AP", true], ["客户端", false]])) +
+			row("加密", sel([["WPA3-SAE", true], ["WPA2-PSK", false], ["WPA2/WPA3 混合", false], ["无加密", false]])) +
+			row("密钥", '<input type="password" class="cbi-input-text" value="supersecret">', "至少 8 个字符。", true) +
+			actions() +
+		'</div>' +
+		'<div class="cbi-section"><legend>已关联的客户端</legend>' +
+			'<table class="table"><tr class="tr table-titles"><th class="th">主机名</th><th class="th">MAC</th><th class="th">信号</th><th class="th">协商速率</th></tr>' +
+			stations + '</table>' +
+		'</div>';
+	}};
+
+	P.dhcp = { title: "网络 · DHCP / DNS", render: function () {
+		var rows = LEASES.map(function (l, i) {
+			return '<tr class="tr" data-leaserow><td class="td">' + txt(l[0]) + '</td><td class="td">' + txt(l[2]) +
+				'</td><td class="td">' + txt(l[1]) + '</td><td class="td"><button class="cbi-button cbi-button-remove" data-act="del-row">删除</button></td></tr>';
+		}).join("");
+		return '<h2>网络 · DHCP / DNS</h2>' +
+		'<p class="cbi-map-descr">dnsmasq 为 LAN 提供 DHCP 与 DNS。可添加静态地址分配。</p>' +
+		'<div class="cbi-section"><legend>DHCP 服务器</legend>' +
+			row("起始地址", txt("100")) +
+			row("地址数量", txt("150")) +
+			row("租期", txt("12h"), "例如 12h（小时）或 30m（分钟）。") +
+			row("忽略此接口", sw(false), null, true) +
+			actions() +
+		'</div>' +
+		'<div class="cbi-section"><legend>静态地址分配</legend>' +
+			'<p class="cbi-section-descr">为指定 MAC 始终分配相同的 IPv4 地址。</p>' +
+			'<table class="table" id="lease-rows"><tr class="tr table-titles"><th class="th">主机名</th><th class="th">MAC 地址</th><th class="th">IPv4 地址</th><th class="th"></th></tr>' +
+			rows + '</table>' +
+			'<div class="demo-row-actions"><button class="cbi-button cbi-button-add" data-add="lease">添加</button></div>' +
+			actions() +
+		'</div>';
+	}};
+
+	P.firewall = { title: "网络 · 防火墙", render: function () {
+		return '<h2>网络 · 防火墙</h2>' +
+		'<p class="cbi-map-descr">区域转发策略与端口转发规则。</p>' +
+		'<div class="cbi-section"><legend>区域</legend>' +
+			'<table class="table"><tr class="tr table-titles"><th class="th">区域</th><th class="th">入站</th><th class="th">出站</th><th class="th">转发</th><th class="th">伪装</th></tr>' +
+			'<tr class="tr"><td class="td"><span class="label success">lan</span> → <span class="label">wan</span></td><td class="td">接受</td><td class="td">接受</td><td class="td">接受</td><td class="td">' + sw(false) + '</td></tr>' +
+			'<tr class="tr"><td class="td"><span class="label">wan</span> → <span class="label">拒绝</span></td><td class="td">拒绝</td><td class="td">接受</td><td class="td">拒绝</td><td class="td">' + sw(true) + '</td></tr>' +
+			'</table>' +
+		'</div>' +
+		'<div class="cbi-section"><legend>端口转发</legend>' +
+			'<table class="table" id="pf-rows"><tr class="tr table-titles"><th class="th">名称</th><th class="th">协议</th><th class="th">外部端口</th><th class="th">内部地址</th><th class="th"></th></tr>' +
+			'<tr class="tr" data-pfrow><td class="td">' + txt("Web 服务器") + '</td><td class="td">' + sel([["TCP", true], ["UDP", false]]) + '</td><td class="td">' + txt("8080") + '</td><td class="td">' + txt("192.168.1.10") + '</td><td class="td"><button class="cbi-button cbi-button-remove" data-act="del-row">删除</button></td></tr>' +
+			'</table>' +
+			'<div class="demo-row-actions"><button class="cbi-button cbi-button-add" data-add="port">添加</button></div>' +
+			actions() +
+		'</div>';
+	}};
+
+	P.system = { title: "系统 · 系统设置", render: function () {
+		return '<h2>系统 · 系统设置</h2>' +
+		'<p class="cbi-map-descr">主机名、时区、语言与时间同步。</p>' +
+		'<div class="cbi-section"><legend>常规设置</legend>' +
+			row("主机名", txt("OpenWrt")) +
+			row("时区", sel([["UTC", false], ["Asia/Shanghai (CST)", true], ["America/New_York", false], ["Europe/London", false]])) +
+			row("语言", sel([["自动", false], ["简体中文", true], ["English", false]]), null, true) +
+			actions() +
+		'</div>' +
+		'<div class="cbi-section"><legend>时间同步 (NTP)</legend>' +
+			row("启用 NTP 客户端", sw(true)) +
+			'<div class="cbi-value cbi-value-last"><label class="cbi-value-title">NTP 服务器</label><div class="cbi-value-field">' +
+				'<div id="ntp-list">' +
+					'<div class="inline-input" data-ntprow style="margin-bottom:8px">' + txt("0.openwrt.pool.ntp.org") + '<button class="cbi-button cbi-button-remove" data-act="del-row">删除</button></div>' +
+					'<div class="inline-input" data-ntprow style="margin-bottom:8px">' + txt("1.openwrt.pool.ntp.org") + '<button class="cbi-button cbi-button-remove" data-act="del-row">删除</button></div>' +
+				'</div>' +
+				'<button class="cbi-button cbi-button-add" data-add="ntp">添加服务器</button>' +
+			'</div></div>' +
+			actions() +
+		'</div>';
+	}};
+
+	P.admin = { title: "系统 · 管理权", render: function () {
+		return '<h2>系统 · 管理权</h2>' +
+		'<p class="cbi-map-descr">设置 root 密码并管理 SSH 访问。</p>' +
+		'<div class="cbi-section"><legend>路由器密码</legend>' +
+			row("密码", '<input type="password" class="cbi-input-text" placeholder="输入新密码">') +
+			row("确认密码", '<input type="password" class="cbi-input-text" placeholder="再次输入">', "用于 Web 界面与 SSH 登录。", true) +
+			'<div class="cbi-page-actions"><button class="cbi-button cbi-button-apply" data-toast="密码已更新">保存</button></div>' +
+		'</div>' +
+		'<div class="cbi-section"><legend>SSH 访问 (Dropbear)</legend>' +
+			row("接口", sel([["unspecified（全部）", false], ["lan", true]])) +
+			row("端口", txt("22")) +
+			row("允许 root 用户密码登录", sw(true)) +
+			row("允许 SSH 密码认证", sw(true), null, true) +
+			actions() +
+		'</div>';
+	}};
+
+	P.software = { title: "系统 · 软件包", render: function () {
+		var rows = PACKAGES.map(function (p) {
+			return '<tr class="tr"><td class="td"><b>' + p[0] + '</b></td><td class="td"><code>' + p[1] + '</code></td><td class="td">' + p[2] +
+				'</td><td class="td"><button class="cbi-button cbi-button-remove" data-toast="已移除 ' + p[0] + '">移除</button></td></tr>';
+		}).join("");
+		return '<h2>系统 · 软件包</h2>' +
+		'<p class="cbi-map-descr">通过 opkg 安装、升级与移除软件包。</p>' +
+		'<div class="cbi-section"><legend>操作</legend>' +
+			'<div class="demo-row-actions">' +
+				'<button class="cbi-button cbi-button-apply" data-toast="正在更新软件包列表…">更新列表</button>' +
+				'<button class="cbi-button" data-toast="未发现可升级的软件包">升级…</button>' +
+			'</div>' +
+			'<div class="cbi-value cbi-value-last" style="padding-top:18px"><label class="cbi-value-title">安装软件包</label>' +
+				'<div class="cbi-value-field"><div class="inline-input">' + txt("", "软件包名称，如 luci-app-ddns") + '<button class="cbi-button cbi-button-apply" data-toast="正在安装…">安装</button></div></div></div>' +
+		'</div>' +
+		'<div class="cbi-section"><legend>已安装的软件包</legend>' +
+			'<table class="table"><tr class="tr table-titles"><th class="th">名称</th><th class="th">版本</th><th class="th">说明</th><th class="th"></th></tr>' +
+			rows + '</table>' +
+		'</div>';
+	}};
+
+	P.startup = { title: "系统 · 启动项", render: function () {
+		var rows = SERVICES.map(function (s) {
+			return '<tr class="tr"><td class="td"><label class="ob-switch" style="display:inline-block;vertical-align:middle">' +
+				'<input type="checkbox"' + (s[2] ? ' checked' : '') + '><span class="ob-switch-track"></span></label></td>' +
+				'<td class="td"><b>' + s[0] + '</b></td><td class="td muted">' + s[1] + '</td>' +
+				'<td class="td"><div class="demo-row-actions" style="margin:0">' +
+				'<button class="cbi-button" data-toast="' + s[0] + ' 已启动">启动</button>' +
+				'<button class="cbi-button" data-toast="' + s[0] + ' 已重启">重启</button>' +
+				'<button class="cbi-button cbi-button-remove" data-toast="' + s[0] + ' 已停止">停止</button></div></td></tr>';
+		}).join("");
+		return '<h2>系统 · 启动项</h2>' +
+		'<p class="cbi-map-descr">控制开机自启动的服务。左侧开关切换「开机启用」。</p>' +
+		'<div class="cbi-section"><legend>初始化脚本</legend>' +
+			'<table class="table"><tr class="tr table-titles"><th class="th" style="width:60px">启用</th><th class="th">名称</th><th class="th">说明</th><th class="th"></th></tr>' +
+			rows + '</table>' +
+		'</div>';
+	}};
+
+	P.services = { title: "服务", render: function () {
+		var cards = SERVICES.map(function (s) {
+			return '<div class="cbi-section"><div class="demo-hero">' +
+				'<div class="grow"><div style="font-size:15px;font-weight:650">' + s[0] + '</div><div class="muted" style="font-size:12.5px">' + s[1] + '</div></div>' +
+				'<span class="label ' + (s[2] ? 'success' : '') + '">' + (s[2] ? '运行中' : '已停止') + '</span>' +
+				'<label class="ob-switch"><input type="checkbox"' + (s[2] ? ' checked' : '') + ' data-toast-on="' + s[0] + ' 已启用" data-toast-off="' + s[0] + ' 已停用"><span class="ob-switch-track"></span></label>' +
+				'</div></div>';
+		}).join("");
+		return '<h2>服务</h2>' +
+		'<p class="cbi-map-descr">已安装服务的运行状态。拨动开关即可启停。</p>' + cards;
+	}};
+
+	P.routes = { title: "状态 · 路由表", render: function () {
+		var data = [
+			["0.0.0.0/0", "203.0.113.1", "wan", "0"],
+			["192.168.1.0/24", "0.0.0.0", "lan", "0"],
+			["203.0.113.0/24", "0.0.0.0", "wan", "0"],
+			["10.8.0.0/24", "10.8.0.1", "openvpn", "10"]
+		];
+		var rows = data.map(function (r) {
+			return '<tr class="tr"><td class="td"><code>' + r[0] + '</code></td><td class="td"><code>' + r[1] + '</code></td><td class="td">' + r[2] + '</td><td class="td">' + r[3] + '</td></tr>';
+		}).join("");
+		return '<h2>状态 · 路由表</h2><p class="cbi-map-descr">当前活动的 IPv4 路由。</p>' +
+		'<div class="cbi-section"><legend>IPv4 路由</legend>' +
+			'<table class="table"><tr class="tr table-titles"><th class="th">目标网络</th><th class="th">网关</th><th class="th">接口</th><th class="th">跃点</th></tr>' + rows + '</table>' +
+		'</div>';
+	}};
+
+	P.syslog = { title: "状态 · 系统日志", render: function () {
+		return '<h2>状态 · 系统日志</h2><p class="cbi-map-descr">内核与服务的实时日志输出。</p>' +
+		'<div class="cbi-section"><legend>系统日志</legend>' +
+			'<div class="demo-row-actions" style="margin-bottom:14px"><button class="cbi-button cbi-button-apply" data-act="logrefresh">刷新</button><button class="cbi-button" data-toast="日志已清空">清空</button></div>' +
+			'<div class="demo-log" id="logbox">' +
+			'<b>Mon Jun 14 09:12:03 2026</b> kernel: [    0.000000] Linux version 6.6.52\n' +
+			'<b>Mon Jun 14 09:12:04 2026</b> procd: - early -\n' +
+			'<b>Mon Jun 14 09:12:06 2026</b> dnsmasq[1842]: started, version 2.90 cachesize 150\n' +
+			'<b>Mon Jun 14 09:12:07 2026</b> netifd: Interface \'wan\' is now up\n' +
+			'<b>Mon Jun 14 09:12:08 2026</b> hostapd: wlan0: AP-ENABLED\n' +
+			'<b>Mon Jun 14 09:12:09 2026</b> uhttpd: LuCI started, theme=Obsidian\n' +
+			'<b>Mon Jun 14 09:13:41 2026</b> dnsmasq-dhcp: DHCPACK 192.168.1.142 iPhone-15-Pro\n' +
+			'</div>' +
+		'</div>';
+	}};
+
+	P.login = { title: "登录", render: function () {
+		return '<form onsubmit="return false"><div class="cbi-map login"><div class="cbi-section">' +
+			'<div style="text-align:center;margin-bottom:6px"><img src="../htdocs/luci-static/obsidian/logo.svg" style="width:48px;height:48px;border-radius:12px"></div>' +
+			'<legend style="text-align:center">登录 OpenWrt</legend>' +
+			'<p class="cbi-section-descr" style="text-align:center">请输入用户名与密码。</p>' +
+			row("用户名", txt("root")) +
+			row("密码", '<input type="password" class="cbi-input-text" placeholder="密码" value="demo">', null, true) +
+			'<div class="cbi-page-actions"><button class="cbi-button cbi-button-apply grow" data-act="dologin">登录</button></div>' +
+		'</div></div></form>';
+	}};
+
+	/* ---- routing ---- */
+	function setActiveNav(id) {
+		var nav = document.getElementById("topmenu");
+		nav.querySelectorAll("li").forEach(function (li) { li.classList.remove("active"); });
+		var link = nav.querySelector('[data-route="' + id + '"]');
+		if (link) {
+			var li = link.closest("li"); if (li) li.classList.add("active");
+			var top = link.closest("li.dropdown"); if (top) top.classList.add("active");
+		}
+	}
+	function navigate(id, push) {
+		var page = P[id] ? id : "overview";
+		var r = P[page];
+		mc.innerHTML = r.render();
+		setActiveNav(page);
+		document.title = r.title + " · OpenWrt | Obsidian";
+		try { window.scrollTo({ top: 0, behavior: "auto" }); } catch (e) { window.scrollTo(0, 0); }
+		document.querySelectorAll("#topmenu li.dropdown.ob-open").forEach(function (li) { li.classList.remove("ob-open"); });
+		if (push !== false) { try { location.hash = "#/" + page; } catch (e) {} }
+	}
+	function curHash() { return ((location.hash || "").replace(/^#\/?/, "")) || "overview"; }
+
+	/* ---- delegated interactions ---- */
+	function addRow(kind) {
+		if (kind === "lease") {
+			var tbl = document.getElementById("lease-rows"); if (!tbl) return;
+			var tr = document.createElement("tr"); tr.className = "tr"; tr.setAttribute("data-leaserow", "");
+			tr.innerHTML = '<td class="td">' + txt("", "主机名") + '</td><td class="td">' + txt("", "MAC") + '</td><td class="td">' + txt("", "IPv4") + '</td><td class="td"><button class="cbi-button cbi-button-remove" data-act="del-row">删除</button></td>';
+			tbl.appendChild(tr);
+		} else if (kind === "port") {
+			var t = document.getElementById("pf-rows"); if (!t) return;
+			var r = document.createElement("tr"); r.className = "tr"; r.setAttribute("data-pfrow", "");
+			r.innerHTML = '<td class="td">' + txt("", "名称") + '</td><td class="td">' + sel([["TCP", true], ["UDP", false]]) + '</td><td class="td">' + txt("", "端口") + '</td><td class="td">' + txt("", "192.168.1.x") + '</td><td class="td"><button class="cbi-button cbi-button-remove" data-act="del-row">删除</button></td>';
+			t.appendChild(r);
+		} else if (kind === "ntp") {
+			var list = document.getElementById("ntp-list"); if (!list) return;
+			var d = document.createElement("div"); d.className = "inline-input"; d.setAttribute("data-ntprow", ""); d.style.marginBottom = "8px";
+			d.innerHTML = txt("", "新的 NTP 服务器") + '<button class="cbi-button cbi-button-remove" data-act="del-row">删除</button>';
+			list.appendChild(d);
+		}
+		toast("已添加一行", false);
+	}
+
+	document.addEventListener("click", function (e) {
+		var t = e.target;
+		if (!t || !t.closest) return;
+
+		/* navigation */
+		var nav = t.closest("[data-route]");
+		if (nav) { e.preventDefault(); navigate(nav.getAttribute("data-route")); return; }
+
+		/* in-page tabs */
+		var tab = t.closest("[data-tab]");
+		if (tab) {
+			e.preventDefault();
+			var key = tab.getAttribute("data-tab");
+			var menu = tab.closest("[data-tabs]");
+			if (menu) menu.querySelectorAll("li").forEach(function (li) { li.classList.remove("active"); });
+			var li2 = tab.closest("li"); if (li2) li2.classList.add("active");
+			document.querySelectorAll(".tabpane").forEach(function (p) { p.hidden = p.getAttribute("data-pane") !== key; });
+			return;
+		}
+
+		/* add a list row */
+		var add = t.closest("[data-add]");
+		if (add) { e.preventDefault(); addRow(add.getAttribute("data-add")); return; }
+
+		/* delete a row */
+		var del = t.closest('[data-act="del-row"]');
+		if (del) {
+			e.preventDefault();
+			var rr = del.closest("[data-leaserow],[data-pfrow],[data-ntprow]");
+			if (rr) rr.parentNode.removeChild(rr);
+			toast("已删除一行", false);
+			return;
+		}
+
+		/* simple toast buttons */
+		var tb = t.closest("[data-toast]");
+		if (tb) { e.preventDefault(); toast(tb.getAttribute("data-toast")); return; }
+
+		/* form-action buttons */
+		var act = t.closest("[data-act]");
+		if (act) {
+			e.preventDefault();
+			var a = act.getAttribute("data-act");
+			if (a === "save") { setUnsaved(unsaved + 1); toast("已保存（待应用）"); }
+			else if (a === "apply") {
+				act.textContent = "正在应用…";
+				setTimeout(function () { act.textContent = "保存并应用"; setUnsaved(0); toast("配置已应用"); }, 850);
+			}
+			else if (a === "reset") { toast("已复位为已保存的值", false); }
+			else if (a === "remove") { toast("已删除该配置", false); }
+			else if (a === "dologin") { navigate("overview"); setTimeout(function () { toast("欢迎回来，root"); }, 200); }
+			else if (a === "logrefresh") {
+				var box = document.getElementById("logbox");
+				if (box) box.insertAdjacentHTML("beforeend", '<b>Mon Jun 14 09:14:' + (10 + Math.floor((box.children.length * 7) % 50)) + ' 2026</b> uhttpd: page rendered with Obsidian theme\n');
+				if (box) box.scrollTop = box.scrollHeight;
+				toast("日志已刷新");
+			}
+			return;
+		}
+	});
+
+	/* range output + service toggle toasts */
+	document.addEventListener("input", function (e) {
+		var r = e.target;
+		if (r && r.matches && r.matches("input[type=range][data-out]")) {
+			var out = document.querySelector(r.getAttribute("data-out"));
+			if (out) out.textContent = r.value + "%";
+		}
+	});
+	document.addEventListener("change", function (e) {
+		var c = e.target;
+		if (c && c.matches && c.matches("input[type=checkbox][data-toast-on]")) {
+			toast(c.checked ? c.getAttribute("data-toast-on") : c.getAttribute("data-toast-off"));
+		}
+	});
+
+	window.addEventListener("hashchange", function () { navigate(curHash(), false); });
+	navigate(curHash(), false);
+})();
+</script>
 </body>
 </html>

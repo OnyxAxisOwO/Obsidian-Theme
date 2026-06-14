@@ -1,0 +1,6 @@
+# Cloudflare Pages routing for the live preview (obsidian-openwrt.pages.dev).
+# The whole repo is published as-is; the demo lives in /preview/ and pulls the
+# real theme assets from /htdocs/. Serve the preview at the site root without
+# changing the URL, and send any unknown path back to it (hash-routed SPA).
+/            /preview/index.html   200
+/index.html  /preview/index.html   200
