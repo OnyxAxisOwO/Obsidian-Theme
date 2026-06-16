@@ -121,7 +121,7 @@ def main():
             if not os.path.isfile(full):
                 sys.exit("ERROR: missing source file: %s" % src)
             with open(full, "rb") as fh:
-                data = fh.read()
+                data = fh.read().replace(b"\r\n", b"\n")   # normalize CRLF->LF (sh needs LF; reproducible cross-platform)
             installed_size += len(data)
             add_dirs(tar, seen_dirs, dest)
             add_bytes(tar, dest, data, mode)

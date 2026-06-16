@@ -284,7 +284,8 @@ def main():
         if not os.path.isfile(full):
             sys.exit("ERROR: missing source file: %s" % src)
         with open(full, "rb") as fh:
-            file_entries.append((dest, mode, fh.read()))
+            # normalize CRLF->LF: sh needs LF, and it makes builds reproducible across platforms
+            file_entries.append((dest, mode, fh.read().replace(b"\r\n", b"\n")))
 
     adb_blob, data_plan, installed_size = build_control(file_entries)
 
