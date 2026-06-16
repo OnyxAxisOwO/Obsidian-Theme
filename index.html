@@ -46,10 +46,10 @@
 	} catch (e) {}
 })();
 </script>
-<link rel="stylesheet" href="../htdocs/luci-static/obsidian/cascade.css">
-<link rel="stylesheet" href="../htdocs/luci-static/obsidian/obsidian.css">
-<link rel="icon" href="../htdocs/luci-static/obsidian/logo.svg">
-<script src="../htdocs/luci-static/obsidian/obsidian.js" defer></script>
+<link rel="stylesheet" href="htdocs/luci-static/obsidian/cascade.css">
+<link rel="stylesheet" href="htdocs/luci-static/obsidian/obsidian.css">
+<link rel="icon" href="htdocs/luci-static/obsidian/logo.svg">
+<script src="htdocs/luci-static/obsidian/obsidian.js" defer></script>
 <style>
 /* ---- preview-only extras (use the theme's own tokens so they re-skin too) ---- */
 .demo-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(168px, 1fr)); gap: 14px; }
@@ -72,7 +72,10 @@
 .dot.up { background: #34c759; } .dot.down { background: var(--ob-text-3); }
 .demo-hero { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
 .demo-hero .hero-logo { width: 44px; height: 44px; border-radius: 11px; }
-.demo-row-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 2px; }
+/* align-items:center keeps buttons at their natural height — without it a flex
+   row taller than the buttons (e.g. the overview hero) stretches them unevenly. */
+.demo-row-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 2px; }
+.demo-row-actions button { white-space: nowrap; flex: 0 0 auto; }
 .muted { color: var(--ob-text-3); }
 .demo-banner {
 	display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
@@ -104,7 +107,7 @@
 
 <header>
 	<a class="brand" href="#/overview" data-route="overview">
-		<img class="ob-brand-logo" src="../htdocs/luci-static/obsidian/logo.svg" alt="">
+		<img class="ob-brand-logo" src="htdocs/luci-static/obsidian/logo.svg" alt="">
 		<span>OpenWrt</span>
 	</a>
 	<ul class="nav" id="topmenu">
@@ -270,7 +273,7 @@
 
 		'<div class="cbi-section">' +
 			'<div class="demo-hero">' +
-				'<img class="hero-logo" src="../htdocs/luci-static/obsidian/logo.svg" alt="">' +
+				'<img class="hero-logo" src="htdocs/luci-static/obsidian/logo.svg" alt="">' +
 				'<div class="grow"><div style="font-size:18px;font-weight:680">OpenWrt 24.10.0</div>' +
 				'<div class="muted" style="font-size:12.5px">Generic x86/64 · 内核 6.6.52 · <span class="label success">在线</span></div></div>' +
 				'<div class="demo-row-actions"><button class="cbi-button cbi-button-apply" data-toast="正在重启路由器…">重启</button>' +
@@ -525,7 +528,7 @@
 
 	P.login = { title: "登录", render: function () {
 		return '<form onsubmit="return false"><div class="cbi-map login"><div class="cbi-section">' +
-			'<div style="text-align:center;margin-bottom:6px"><img src="../htdocs/luci-static/obsidian/logo.svg" style="width:48px;height:48px;border-radius:12px"></div>' +
+			'<div style="text-align:center;margin-bottom:6px"><img src="htdocs/luci-static/obsidian/logo.svg" style="width:48px;height:48px;border-radius:12px"></div>' +
 			'<legend style="text-align:center">登录 OpenWrt</legend>' +
 			'<p class="cbi-section-descr" style="text-align:center">请输入用户名与密码。</p>' +
 			row("用户名", txt("root")) +

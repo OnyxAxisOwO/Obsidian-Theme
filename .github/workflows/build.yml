@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   build:
-    name: Build & validate .ipk
+    name: Build & validate .ipk / .apk
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -28,23 +28,54 @@ jobs:
           node --check htdocs/luci-static/obsidian/obsidian.js
           node --check htdocs/luci-static/resources/menu-obsidian.js
 
-      - name: Build .ipk
-        run: python packaging/build-ipk.py
+      - name: Build packages (.ipk + .apk)
+        run: |
+          python packaging/build-ipk.py
+          python packaging/build-apk.py
 
-      - name: Validate .ipk
-        run: python packaging/validate-ipk.py
+      - name: Validate packages (structure)
+        run: |
+          python packaging/validate-ipk.py
+          python packaging/validate-apk.py
 
-      - name: Upload artifact
+      # Independent oracle: validate the hand-built APKv3 with the REAL apk-tools 3.
+      # apk-tools-static ships a fully-static apk binary, so it runs straight on
+      # ubuntu (no Alpine container needed). A successful `apk extract` parses the
+      # whole ADB tree and verifies every file's SHA-256 — exactly an install does.
+      - name: Validate .apk with real apk-tools (oracle)
+        run: |
+          set -eux
+          base=https://dl-cdn.alpinelinux.org/alpine/edge/main/x86_64
+          f=$(wget -qO- "$base/" | grep -o 'apk-tools-static-[0-9][^"]*\.apk' | head -1)
+          test -n "$f"
+          wget -q "$base/$f" -O apk-tools-static.apk
+          mkdir -p apktools
+          # an .apk is concatenated gzip tar segments; -i spans them to reach the data segment
+          gzip -dc apk-tools-static.apk | tar -i -x -C apktools
+          APK=$(find apktools -name 'apk.static' -type f | head -1)
+          test -n "$APK"; chmod +x "$APK"
+          "$APK" version || "$APK" --version || true
+          mkdir -p apk-extract
+          "$APK" --allow-untrusted extract --destination apk-extract dist/*.apk
+          test -f apk-extract/www/luci-static/obsidian/obsidian.css
+          test -f apk-extract/www/luci-static/resources/menu-obsidian.js
+          test -f apk-extract/usr/share/ucode/luci/template/themes/obsidian/header.ut
+          test -f apk-extract/etc/uci-defaults/30_luci-theme-obsidian
+          echo "OK: real apk-tools accepted and extracted the APKv3 package."
+
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: luci-theme-obsidian-ipk
-          path: dist/*.ipk
+          name: luci-theme-obsidian-packages
+          path: dist/*
           if-no-files-found: error
 
       - name: Publish Release (on tag)
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/*.ipk
+          files: |
+            dist/*.ipk
+            dist/*.apk
           generate_release_notes: true
           fail_on_unmatched_files: true
