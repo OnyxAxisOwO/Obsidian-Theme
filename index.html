@@ -75,7 +75,9 @@
 /* align-items:center keeps buttons at their natural height — without it a flex
    row taller than the buttons (e.g. the overview hero) stretches them unevenly. */
 .demo-row-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 2px; }
-.demo-row-actions button { white-space: nowrap; flex: 0 0 auto; }
+/* Fixed height + nowrap guarantees every action button is exactly the same
+   height regardless of label length, flex stretch or CJK font metrics. */
+.demo-row-actions button { white-space: nowrap; flex: 0 0 auto; height: 34px; line-height: 1; }
 .muted { color: var(--ob-text-3); }
 .demo-banner {
 	display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
