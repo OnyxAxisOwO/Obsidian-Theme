@@ -30,6 +30,7 @@ jobs:
 
       - name: Build packages (.ipk + .apk)
         run: |
+          rm -f dist/*.ipk dist/*.apk
           python packaging/build-ipk.py
           python packaging/build-apk.py
 
