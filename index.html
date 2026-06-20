@@ -106,6 +106,71 @@
 .inline-input { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 .inline-input input { flex: 1 1 220px; }
 .grow { flex: 1 1 auto; }
+
+/* ── mobile (preview-only tweaks; mirror the theme's 680 px breakpoint) ── */
+@media (max-width: 680px) {
+	/* Banner: regular radius + flush links when wrapped */
+	.demo-banner {
+		border-radius: var(--ob-radius);
+		padding: 8px 14px;
+		gap: 8px;
+		margin-bottom: 14px;
+	}
+	.demo-banner .bx { margin-left: 0; }
+
+	/* Root cause of horizontal page overflow on phones: <body> is a column
+	   flexbox, so #maincontent (a flex item) keeps the default min-width:auto
+	   and refuses to shrink below its widest child. A 5-column table then
+	   forces #maincontent — and the whole page — wider than the viewport.
+	   min-width:0 lets the flex item shrink back; max-width:100% caps it. */
+	#maincontent { min-width: 0; max-width: 100%; }
+
+	/* Wide tables (device list, leases…) scroll inside their own wrapper
+	   instead of stretching the page. width:0 + min-width:100% pins the
+	   wrapper to its parent's width — ignoring the table's intrinsic width —
+	   so it can clip and scroll. The table keeps max-content (one line per
+	   cell) and is scrolled horizontally within. Wrapper added in JS. */
+	.tscroll {
+		overflow-x: auto;
+		-webkit-overflow-scrolling: touch;
+		width: 0;
+		min-width: 100%;
+	}
+	.tscroll > table.table { width: max-content; min-width: 100%; }
+
+	/* Stats grid: force 2 columns on all phone widths */
+	.demo-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+	.demo-tile { padding: 12px 14px; gap: 10px; }
+	.demo-tile .t-value { font-size: 18px; }
+	.demo-gauge { width: 44px; height: 44px; }
+	.demo-gauge circle { stroke-width: 4.5; }
+	.demo-gauge text { font: 700 13px var(--ob-font); }
+
+	/* Log box: shorten so it doesn't swallow the viewport */
+	.demo-log { max-height: 200px; }
+
+	/* Hero action buttons: tighter gap */
+	.demo-row-actions { gap: 6px; }
+
+	/* Hero: keep logo+title on row 1, push buttons to a full-width row 2
+	   so they are always clearly visible and large enough to tap. */
+	.demo-hero .demo-row-actions { flex-basis: 100%; margin-top: 2px; }
+
+	/* ── Header / top menu ──
+	   IMPORTANT: do NOT put overflow-x on .nav to keep it on one line. Setting
+	   overflow-x:auto forces overflow-y to auto as well, which clips the
+	   dropdown menus (状态/系统/网络) — they open *below* the bar and would be
+	   cut off, making those items impossible to tap. Instead we tighten the
+	   spacing so the menu fits, and let it wrap as a harmless fallback. */
+	header { gap: 8px; }
+	header .nav { column-gap: 2px; row-gap: 2px; }
+	header .nav a, header .nav a.menu { padding: 5px 7px; font-size: 12.5px; }
+
+	/* Indicators: keep "注销" intact and drop the unsaved badge to free room. */
+	#indicators { flex-shrink: 0; gap: 6px; }
+	#indicators a { white-space: nowrap; font-size: 12px; padding: 4px 8px; }
+	#ind-unsaved { display: none; }
+}
 </style>
 </head>
 <body class="lang_zh-cn" data-page="admin-status-overview">
@@ -553,10 +618,23 @@
 			var top = link.closest("li.dropdown"); if (top) top.classList.add("active");
 		}
 	}
+	/* Wrap every table in a horizontal-scroll container so wide tables scroll
+	   on small screens instead of widening the page (see .tscroll in CSS). */
+	function wrapTables() {
+		mc.querySelectorAll("table.table").forEach(function (t) {
+			if (t.parentNode && t.parentNode.classList.contains("tscroll")) return;
+			var w = document.createElement("div");
+			w.className = "tscroll";
+			t.parentNode.insertBefore(w, t);
+			w.appendChild(t);
+		});
+	}
+
 	function navigate(id, push) {
 		var page = P[id] ? id : "overview";
 		var r = P[page];
 		mc.innerHTML = r.render();
+		wrapTables();
 		setActiveNav(page);
 		document.title = r.title + " · OpenWrt | Obsidian";
 		try { window.scrollTo({ top: 0, behavior: "auto" }); } catch (e) { window.scrollTo(0, 0); }
