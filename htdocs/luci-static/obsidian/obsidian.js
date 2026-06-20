@@ -11,7 +11,7 @@
 	if (window.__obsidianControlCenter) return;
 	window.__obsidianControlCenter = true;
 
-	var VERSION = "1.0.6";
+	var VERSION = "1.0.7";
 	var GITHUB = "https://github.com/OnyxAxisOwO/Obsidian-Theme";
 
 	var root = document.documentElement;
