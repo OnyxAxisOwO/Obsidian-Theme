@@ -11,7 +11,7 @@
 	if (window.__obsidianControlCenter) return;
 	window.__obsidianControlCenter = true;
 
-	var VERSION = "1.0.7";
+	var VERSION = "1.0.8";
 	var GITHUB = "https://github.com/OnyxAxisOwO/Obsidian-Theme";
 
 	var root = document.documentElement;
@@ -380,6 +380,77 @@
 		});
 		body.appendChild(group("辅助功能", [rt.row, rm.row]));
 
+		/* --- Backup & Restore --- */
+		var exportBtn = el("button", { type: "button", "class": "ob-btn ob-btn-accent", text: "导出设置" });
+		var importFileInput = el("input", { type: "file", accept: "application/json", style: "display:none" });
+		var importBtn = el("button", { type: "button", "class": "ob-btn", text: "导入设置" });
+		var backupHint = el("div", { "class": "ob-hint", style: "margin-top:6px" });
+		exportBtn.addEventListener("click", function () {
+			var data = {};
+			for (var k in KEY) {
+				var val = lsGet(KEY[k], null);
+				if (val !== null) data[KEY[k]] = val;
+			}
+			try {
+				var blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+				var url = URL.createObjectURL(blob);
+				var a = el("a", { href: url, download: "obsidian-settings.json" });
+				document.body.appendChild(a);
+				a.click();
+				document.body.removeChild(a);
+				URL.revokeObjectURL(url);
+				backupHint.textContent = "设置已成功导出。";
+			} catch (e) {
+				backupHint.textContent = "导出失败: " + e.message;
+			}
+		});
+		importBtn.addEventListener("click", function () { importFileInput.click(); });
+		importFileInput.addEventListener("change", function () {
+			var f = importFileInput.files && importFileInput.files[0];
+			importFileInput.value = "";
+			if (!f) return;
+			var r = new FileReader();
+			r.onload = function () {
+				try {
+					var data = JSON.parse(r.result);
+					for (var k in KEY) {
+						var keyName = KEY[k];
+						if (data && data[keyName] !== undefined) {
+							lsSet(keyName, data[keyName]);
+						} else {
+							lsSet(keyName, null);
+						}
+					}
+					applyTheme(lsGet(KEY.accent, ""), lsGet(KEY.themeGlobal, "1") === "1");
+					applyWallpaper(lsGet(KEY.wallpaper, ""));
+					
+					var blurValParsed = lsGet(KEY.blur, "");
+					if (blurValParsed !== "") applyBlur(parseInt(blurValParsed, 10) || 0);
+					else root.style.removeProperty("--ob-wallpaper-blur");
+
+					var dimValParsed = lsGet(KEY.dim, "");
+					if (dimValParsed !== "") applyDim(parseFloat(dimValParsed) || 0);
+					else root.style.removeProperty("--ob-wallpaper-dim");
+
+					applyWidth(lsGet(KEY.width, DEFAULT_WIDTH));
+					applyWpFit(lsGet(KEY.wpfit, ""));
+					applyToggle("data-reduce-transparency", lsGet(KEY.reduceTransparency, "0") === "1");
+					applyToggle("data-reduce-motion", lsGet(KEY.reduceMotion, "0") === "1");
+					applyAppearance(lsGet(KEY.appearance, "auto"));
+					hydrate();
+					backupHint.textContent = "设置已成功导入！";
+				} catch (e) {
+					backupHint.textContent = "导入失败，文件格式不正确。";
+				}
+			};
+			r.onerror = function () {
+				backupHint.textContent = "读取文件失败。";
+			};
+			r.readAsText(f);
+		});
+		var backupRow = el("div", { "class": "ob-wp-actions" }, [exportBtn, importBtn, importFileInput]);
+		body.appendChild(group("配置备份", [backupRow, backupHint]));
+
 		/* --- About --- */
 		var ver = el("div", { "class": "ob-about-ver", text: "Obsidian 主题 · v" + VERSION });
 		var gh = el("a", { "class": "ob-about-link", href: GITHUB, target: "_blank", rel: "noreferrer", text: "GitHub 仓库 ↗" });
@@ -490,6 +561,17 @@
 			}
 			if (t.closest("header .nav .dropdown-menu a")) { closeAllDropdowns(); return; }
 			if (!t.closest("header .nav li.dropdown.ob-open")) closeAllDropdowns();
+		});
+		document.addEventListener("mouseover", function (e) {
+			var t = e.target;
+			if (!t || !t.closest) return;
+			var navItem = t.closest("header .nav > li");
+			if (navItem) {
+				var pinned = document.querySelector("header .nav li.dropdown.ob-open");
+				if (pinned && pinned !== navItem) {
+					pinned.classList.remove("ob-open");
+				}
+			}
 		});
 		document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeAllDropdowns(); });
 	}

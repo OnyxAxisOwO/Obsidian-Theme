@@ -34,7 +34,7 @@ import hashlib
 
 # --------------------------------------------------------------------------- #
 PKG_NAME = "luci-theme-obsidian"
-VERSION = "1.0.7-r1"          # apk uses -rN revisions (ipk's "1.0.7-1" -> "1.0.7-r1")
+VERSION = "1.0.8-r1"          # apk uses -rN revisions (ipk's "1.0.7-1" -> "1.0.7-r1")
 ARCH = "noarch"              # OpenWrt maps PKGARCH=all -> apk arch "noarch" (universal)
 MAINTAINER = "Obsidian Theme contributors"
 DESCRIPTION = "Obsidian - a clean modern LuCI theme (light/dark mode, custom wallpaper, adjustable blur, accent colours)."
